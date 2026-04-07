@@ -1,0 +1,27 @@
+name: Deploy to Hugging Face
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Push to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git clone https://user:$HF_TOKEN@huggingface.co/spaces/Girihara/byd_nghlog hf_repo
+          cp index.html hf_repo/
+          cp manifest.json hf_repo/ 2>/dev/null || true
+          cp sw.js hf_repo/ 2>/dev/null || true
+          cp icon-192.png hf_repo/ 2>/dev/null || true
+          cp icon-512.png hf_repo/ 2>/dev/null || true
+          cd hf_repo
+          git add .
+          git diff --staged --quiet || git commit -m "Auto deploy from GitHub"
+          git push
