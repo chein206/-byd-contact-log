@@ -486,12 +486,24 @@ function jsonPrompt() {
   "date":"날짜(YYYY-MM-DD, 없으면 ${today()})",
   "name":"고객명(없으면 미상)",
   "phone":"연락처(010-XXXX-XXXX, 없으면 빈문자열)",
-  "car":"관심차종(씰/아토3/한/돌핀/씰U 중 하나, 없으면 미정)",
+  "car":"관심차종(아래 차종 매핑 참고하여 정확한 차종명으로 변환, 없으면 미정)",
   "contact":"컨택유형(방문/전화/문자/카카오/SNS/기타)",
   "interest":"주요 관심사 요약(1-2줄)",
   "next":"다음 액션(없으면 추후 연락)",
   "memo":"기타 메모(없으면 빈문자열)"
-}`;
+}
+
+[차종 매핑 규칙 - 아래 약칭/별칭을 정확한 차종명으로 변환]
+씨라7, 씨라이언7, sealion7, SL7, 씰라이언 → 씨라이언7
+씰후, 씰rwd, seal rwd, RWD → 씰RWD
+씰사, 씰awd, seal awd, AWD → 씰AWD
+씰, seal → 씰
+돌핀A, 돌핀액티브, dolphin active, active → 돌핀Active
+돌핀, dolphin → 돌핀
+아토, 아토3, atto, atto3 → 아토3
+한, han → 한
+
+입력에서 차종 관련 단어를 찾아 위 매핑으로 변환해줘. 대소문자 무시.`;
 }
 
 async function analyzeText() {
