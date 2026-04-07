@@ -216,6 +216,9 @@
     <button class="btn btn-outline" onclick="saveContact()" style="margin-bottom:8px;font-size:14px;">
       📱 연락처 저장
     </button>
+    <button class="btn btn-outline" onclick="showFollowupPopup()" style="margin-bottom:8px;font-size:14px;color:var(--blue);border-color:rgba(90,138,224,0.4);">
+      📨 팔로업 메시지 생성
+    </button>
     <div id="saveStatus" style="min-height:28px;"></div>
   </div>
 
@@ -269,6 +272,26 @@
       → 구글 시트 자동 저장 ✓<br>
       → 노션 BYD 고객 관리 DB 자동 저장 ✓<br>
       → 기기 로컬 저장 ✓
+    </div>
+  </div>
+
+  <div class="card" style="border-color:rgba(90,138,224,0.25);">
+    <div class="card-label">팔로업 메시지 설정</div>
+    <div style="margin-bottom:12px;"><div class="setting-label">담당자명</div><input type="text" id="fuName" placeholder="남광희" oninput="saveFollowupSettings()"></div>
+    <div style="margin-bottom:12px;"><div class="setting-label">직함</div><input type="text" id="fuTitle" placeholder="대리" oninput="saveFollowupSettings()"></div>
+    <div style="margin-bottom:12px;"><div class="setting-label">연락처</div><input type="tel" id="fuPhone" placeholder="010-2055-3180" oninput="saveFollowupSettings()"></div>
+    <div style="margin-bottom:16px;"><div class="setting-label">전시장명</div><input type="text" id="fuShowroom" placeholder="BYD 서초전시장" oninput="saveFollowupSettings()"></div>
+    <div style="border-top:0.5px solid var(--border);padding-top:14px;margin-bottom:16px;">
+      <div class="setting-label" style="margin-bottom:10px;">차종별 블로그 링크</div>
+      <div style="margin-bottom:10px;"><div style="font-size:12px;color:var(--accent);font-family:'DM Mono',monospace;margin-bottom:4px;">🐬 돌핀</div><input type="url" id="fu-dolphin" placeholder="https://blog.naver.com/..." oninput="saveFollowupSettings()"></div>
+      <div style="margin-bottom:10px;"><div style="font-size:12px;color:var(--accent);font-family:'DM Mono',monospace;margin-bottom:4px;">🚗 아토3</div><input type="url" id="fu-atto3" placeholder="https://blog.naver.com/..." oninput="saveFollowupSettings()"></div>
+      <div style="margin-bottom:10px;"><div style="font-size:12px;color:var(--accent);font-family:'DM Mono',monospace;margin-bottom:4px;">🦭 씰</div><input type="url" id="fu-seal" placeholder="https://blog.naver.com/..." oninput="saveFollowupSettings()"></div>
+      <div style="margin-bottom:10px;"><div style="font-size:12px;color:var(--accent);font-family:'DM Mono',monospace;margin-bottom:4px;">🦁 씨라이언7</div><input type="url" id="fu-sealion7" placeholder="https://blog.naver.com/..." oninput="saveFollowupSettings()"></div>
+    </div>
+    <div style="border-top:0.5px solid var(--border);padding-top:14px;">
+      <div class="setting-label" style="margin-bottom:4px;">🔋 LFP 배터리 자료</div>
+      <div class="setting-desc" style="margin-bottom:6px;">모든 차종 메시지에 공통 포함</div>
+      <input type="url" id="fu-lfp" placeholder="https://blog.naver.com/..." oninput="saveFollowupSettings()">
     </div>
   </div>
 
@@ -790,6 +813,165 @@ function clearAll() {
 }
 
 updateConn();
+
+const FU_KEY = 'byd_fu_v3';
+const FU_CARS = [
+  { id:'dolphin',  label:'돌핀' },
+  { id:'atto3',    label:'아토3' },
+  { id:'seal',     label:'씰' },
+  { id:'sealion7', label:'씨라이언7' }
+];
+
+function saveFollowupSettings() {
+  const data = {
+    name:$('fuName')?.value.trim()||'', title:$('fuTitle')?.value.trim()||'',
+    phone:$('fuPhone')?.value.trim()||'', showroom:$('fuShowroom')?.value.trim()||'',
+    lfp:$('fu-lfp')?.value.trim()||'', links:{}
+  };
+  FU_CARS.forEach(c => { data.links[c.id] = ($('fu-'+c.id)?.value||'').trim(); });
+  localStorage.setItem(FU_KEY, JSON.stringify(data));
+}
+function loadFuData() { try{return JSON.parse(localStorage.getItem(FU_KEY)||'{}');}catch(e){return {};} }
+function renderFollowupSettings() {
+  const d=loadFuData();
+  if($('fuName'))     $('fuName').value     = d.name||'';
+  if($('fuTitle'))    $('fuTitle').value    = d.title||'';
+  if($('fuPhone'))    $('fuPhone').value    = d.phone||'';
+  if($('fuShowroom')) $('fuShowroom').value = d.showroom||'';
+  if($('fu-lfp'))     $('fu-lfp').value     = d.lfp||'';
+  FU_CARS.forEach(c=>{ const el=$('fu-'+c.id); if(el) el.value=(d.links||{})[c.id]||''; });
+}
+function carToId(carName) {
+  const map = {
+    '돌핀':'dolphin','dolphin':'dolphin',
+    '아토3':'atto3','atto3':'atto3','atto':'atto3',
+    '씰':'seal','seal':'seal','씰rwd':'seal','씰awd':'seal',
+    '씨라이언7':'sealion7','sealion7':'sealion7','씨라7':'sealion7'
+  };
+  const lower=(carName||'').toLowerCase().replace(/\s/g,'');
+  for(const [k,v] of Object.entries(map)){
+    if(lower.includes(k.toLowerCase().replace(/\s/g,''))) return v;
+  }
+  return null;
+}
+function buildMessage(carId, note) {
+  const d=loadFuData();
+  const rep=d.name||'', title=d.title||'', phone=d.phone||'';
+  const room=d.showroom||'BYD 전시장', lfpUrl=d.lfp||'';
+  const carInfo=FU_CARS.find(c=>c.id===carId);
+  const carLabel=carInfo?.label||carId||'차량';
+  const carUrl=(d.links||{})[carId]||'';
+
+  let msg = `안녕하십니까 고객님! 😊
+`;
+  msg += `방금 안내드렸던 ${room} ${rep}${title?' '+title:''} 입니다.
+
+`;
+  msg += `금일 상담드렸던 ${carLabel} 관련 자료를 전달드립니다.
+`;
+  msg += `궁금하신 부분은 언제든 편하신 시간에 연락 주시면
+친절히 안내드리겠습니다! 🙏
+`;
+  if(carUrl) msg+=`
+📌 ${carLabel} 상세 자료
+${carUrl}
+`;
+  if(lfpUrl) msg+=`
+🔋 LFP 배터리 정보
+${lfpUrl}
+`;
+  if(note)   msg+=`
+${note}
+`;
+  msg+=`
+──────────────────
+${rep}${title?' '+title:''}`;
+  if(phone) msg+=`
+📱 ${phone}`;
+  if(room)  msg+=`
+📍 ${room}`;
+  return msg;
+}
+function showFollowupPopup() {
+  const rawCar=$('f-car')?.value.trim()||'';
+  const guessedId=carToId(rawCar);
+  const existing=$('followupPopup'); if(existing) existing.remove();
+  const popup=document.createElement('div');
+  popup.id='followupPopup';
+  popup.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.72);z-index:9999;display:flex;align-items:flex-end;justify-content:center;font-family:'Noto Sans KR',sans-serif;';
+  const carBtns=FU_CARS.map(c=>`
+    <button class="fu-car-btn" data-id="${c.id}" onclick="selectFuCar('${c.id}')"
+      style="flex:1;padding:9px 4px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;border:0.5px solid ${c.id===guessedId?'rgba(90,138,224,0.5)':'rgba(255,255,255,0.1)'};background:${c.id===guessedId?'#1a2a3a':'var(--surface2)'};color:${c.id===guessedId?'#60a5fa':'var(--text2)'};">
+      ${c.label}
+    </button>`).join('');
+  popup.innerHTML=`
+    <div style="background:#141414;border:0.5px solid rgba(255,255,255,0.12);border-radius:16px 16px 0 0;padding:20px 20px 36px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;">
+      <div style="width:36px;height:4px;background:#2a2a2a;border-radius:2px;margin:0 auto 16px;"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-size:15px;font-weight:600;color:#f0f0f0;">📨 팔로업 메시지</div>
+        <button onclick="$('followupPopup').remove()" style="background:transparent;border:none;color:#555;font-size:20px;cursor:pointer;">✕</button>
+      </div>
+      <div style="margin-bottom:12px;">
+        <div style="font-size:11px;color:#555;margin-bottom:6px;font-family:monospace;">차종 선택</div>
+        <div style="display:flex;gap:6px;">${carBtns}</div>
+      </div>
+      <input type="hidden" id="fu-car-id" value="${guessedId||''}">
+      <div style="margin-bottom:12px;">
+        <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">추가 메모 (선택)</div>
+        <input id="fu-note" type="text" placeholder="예) 이번 주 일요일 시승 기대하겠습니다! 😊"
+          style="width:100%;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:13px;padding:10px;outline:none;font-family:inherit;"
+          oninput="refreshFuPreview()">
+      </div>
+      <div style="margin-bottom:14px;">
+        <div style="font-size:11px;color:#555;margin-bottom:6px;font-family:monospace;">미리보기</div>
+        <textarea id="fu-preview"
+          style="width:100%;height:250px;background:#111;border:0.5px solid rgba(255,255,255,0.06);border-radius:8px;color:#c8c8c8;font-size:13px;padding:12px;outline:none;font-family:inherit;resize:none;line-height:1.9;"
+          readonly></textarea>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button id="fu-copy-btn" onclick="copyFuMsg()"
+          style="flex:1;height:50px;background:#1a2a3a;color:#5a8ae0;border:0.5px solid rgba(90,138,224,0.35);border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;">
+          📋 복사
+        </button>
+        <button onclick="window.location.href='kakaotalk://'"
+          style="flex:1;height:50px;background:#1a1a08;color:#e8d5a3;border:0.5px solid rgba(232,213,163,0.25);border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;">
+          💬 카카오
+        </button>
+      </div>
+      <div id="fu-status" style="min-height:22px;margin-top:8px;text-align:center;font-size:12px;color:#5aaa7a;"></div>
+    </div>`;
+  document.body.appendChild(popup);
+  popup.addEventListener('click',e=>{if(e.target===popup)popup.remove();});
+  refreshFuPreview();
+}
+function selectFuCar(id) {
+  $('fu-car-id').value=id;
+  document.querySelectorAll('.fu-car-btn').forEach(btn=>{
+    const sel=btn.dataset.id===id;
+    btn.style.background=sel?'#1a2a3a':'var(--surface2)';
+    btn.style.color=sel?'#60a5fa':'var(--text2)';
+    btn.style.borderColor=sel?'rgba(90,138,224,0.5)':'rgba(255,255,255,0.1)';
+  });
+  refreshFuPreview();
+}
+function refreshFuPreview() {
+  const carId=$('fu-car-id')?.value||'';
+  const note=$('fu-note')?.value.trim()||'';
+  const prev=$('fu-preview');
+  if(prev) prev.value=buildMessage(carId,note);
+}
+async function copyFuMsg() {
+  const msg=$('fu-preview')?.value; if(!msg) return;
+  try {
+    await navigator.clipboard.writeText(msg);
+    const btn=$('fu-copy-btn');
+    btn.textContent='✅ 복사됨!'; btn.style.background='#1a3a1a'; btn.style.color='#5aaa7a';
+    $('fu-status').textContent='카카오/문자에 붙여넣기 하세요!';
+    setTimeout(()=>{ btn.textContent='📋 복사'; btn.style.background='#1a2a3a'; btn.style.color='#5a8ae0'; $('fu-status').textContent=''; },2200);
+  } catch(e) { $('fu-preview').select(); $('fu-status').textContent='텍스트를 직접 선택 후 복사해주세요'; }
+}
+const _origRenderSettings=renderSettings;
+function renderSettings(){ _origRenderSettings(); renderFollowupSettings(); }
 </script>
 </body>
 </html>
