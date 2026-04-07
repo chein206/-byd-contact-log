@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BYD 상담기록">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="manifest" href="manifest.json">
+<title>BYD 고객 상담 기록</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0a0a; --surface:#141414; --surface2:#1c1c1c;
+    --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.15);
+    --text:#f0f0f0; --text2:#888; --text3:#555;
+    --accent:#e8d5a3; --accent2:#c4a96b;
+    --red:#e05a5a; --green:#5aaa7a; --blue:#5a8ae0;
+    --radius:14px; --radius-sm:8px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;}
+
+  .header{position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:0.5px solid var(--border);padding:14px 20px 12px;display:flex;align-items:center;justify-content:space-between;}
+  .logo-badge{background:var(--accent);color:#1a1200;font-size:11px;font-weight:700;letter-spacing:0.08em;padding:3px 8px;border-radius:4px;}
+  .header-title{font-size:15px;font-weight:500;margin-left:10px;}
+  .header-left{display:flex;align-items:center;}
+  .conn-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);}
+  .conn-dot.on{background:var(--green);box-shadow:0 0 5px rgba(90,170,122,0.5);}
+  .conn-label{font-size:11px;color:var(--text3);margin-left:5px;}
+
+  .tabs{display:flex;background:var(--surface);border-bottom:0.5px solid var(--border);}
+  .tab{flex:1;padding:12px 8px;text-align:center;font-size:13px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500;}
+
+  .page{display:none;padding:16px;padding-bottom:40px;}
+  .page.active{display:block;}
+
+  .card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
+  .card-label{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px;}
+
+  .mode-tabs{display:flex;gap:6px;margin-bottom:12px;}
+  .mode-btn{flex:1;padding:10px 4px;border-radius:var(--radius-sm);background:var(--surface);border:0.5px solid var(--border);color:var(--text3);font-family:'Noto Sans KR',sans-serif;font-size:12px;cursor:pointer;transition:all 0.15s;text-align:center;}
+  .mode-btn.active{background:var(--surface2);border-color:var(--accent2);color:var(--accent);font-weight:500;}
+
+  textarea,input[type=text],input[type=url],input[type=tel]{width:100%;background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;padding:12px;outline:none;transition:border-color 0.2s;-webkit-appearance:none;}
+  textarea:focus,input:focus{border-color:var(--accent2);}
+  textarea{min-height:100px;resize:none;line-height:1.7;}
+  input[type=text],input[type=url],input[type=tel]{height:44px;}
+  ::placeholder{color:var(--text3);}
+
+  /* 음성 */
+  .voice-wrap{text-align:center;padding:24px 0 16px;}
+  .voice-circle{width:80px;height:80px;border-radius:50%;background:var(--surface2);border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;margin:0 auto;cursor:pointer;transition:all 0.2s;font-size:32px;}
+  .voice-circle.recording{background:rgba(224,90,90,0.15);border-color:var(--red);animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+  .voice-status{font-size:13px;color:var(--text3);margin-top:12px;}
+
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:48px;border-radius:var(--radius-sm);font-family:'Noto Sans KR',sans-serif;font-size:15px;font-weight:500;cursor:pointer;border:none;transition:all 0.15s;}
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--accent);color:#1a1200;}
+  .btn-primary:hover{background:#f0df9a;}
+  .btn-primary:disabled{background:#3a3020;color:#6a5a30;cursor:not-allowed;transform:none;}
+  .btn-outline{background:transparent;color:var(--text);border:0.5px solid var(--border2);}
+  .btn-outline:hover{background:var(--surface2);}
+  .btn-save{background:#1a2a1a;color:var(--green);border:0.5px solid rgba(90,170,122,0.3);}
+
+  .photo-drop{border:1.5px dashed var(--border2);border-radius:var(--radius-sm);padding:32px 16px;text-align:center;cursor:pointer;transition:all 0.15s;}
+  .photo-drop:active{background:var(--surface2);}
+  #previewImg{width:100%;border-radius:var(--radius-sm);border:0.5px solid var(--border);display:block;}
+  .clear-photo{background:transparent;border:none;color:var(--text3);font-size:12px;cursor:pointer;margin-top:8px;display:block;}
+
+  .result-grid{display:flex;flex-direction:column;}
+  .result-row{display:flex;align-items:center;padding:9px 0;border-bottom:0.5px solid var(--border);gap:10px;}
+  .result-row:last-child{border-bottom:none;}
+  .result-key{font-size:11px;color:var(--text3);min-width:68px;font-family:'DM Mono',monospace;}
+  .result-input{flex:1;background:transparent;border:none;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;outline:none;border-bottom:0.5px solid transparent;padding-bottom:1px;transition:border-color 0.2s;}
+  .result-input:focus{border-bottom-color:var(--accent2);}
+
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border-radius:20px;margin-top:8px;}
+  .badge-ok{background:rgba(90,170,122,0.15);color:var(--green);}
+  .badge-err{background:rgba(224,90,90,0.15);color:var(--red);}
+  .badge-info{background:rgba(90,138,224,0.15);color:var(--blue);}
+  .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+  .spinner{width:15px;height:15px;border-radius:50%;border:2px solid rgba(26,18,0,0.2);border-top-color:#1a1200;animation:spin 0.7s linear infinite;display:inline-block;}
+  .spinner-light{border:2px solid var(--border);border-top-color:var(--accent);}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .record-item{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;cursor:pointer;}
+  .record-item:active{border-color:var(--border2);}
+  .record-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+  .record-name{font-size:15px;font-weight:500;}
+  .record-car{font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(232,213,163,0.12);color:var(--accent);font-family:'DM Mono',monospace;}
+  .record-meta{font-size:12px;color:var(--text3);}
+  .record-next{font-size:12px;color:var(--text2);margin-top:3px;}
+
+  .setting-label{font-size:13px;color:var(--text2);margin-bottom:6px;}
+  .setting-desc{font-size:11px;color:var(--text3);margin-top:5px;line-height:1.6;}
+  .setting-row{margin-bottom:14px;}
+  .empty-state{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px;line-height:2;}
+  .hint{font-size:12px;color:var(--text3);margin-top:6px;line-height:1.6;}
+  .count-pill{display:inline-block;font-size:11px;background:var(--surface2);color:var(--text3);padding:1px 7px;border-radius:10px;font-family:'DM Mono',monospace;border:0.5px solid var(--border);}
+
+  .info-box{background:rgba(232,213,163,0.06);border:0.5px solid rgba(232,213,163,0.2);border-radius:var(--radius-sm);padding:12px;font-size:12px;color:var(--text2);line-height:1.8;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <span class="logo-badge">BYD</span>
+    <span class="header-title">고객 상담 기록</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px;">
+    <div class="conn-dot" id="connDot"></div>
+    <span class="conn-label" id="connLabel">미연결</span>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('input')">✦ 새 기록</div>
+  <div class="tab" onclick="switchTab('history')">기록 목록</div>
+  <div class="tab" onclick="switchTab('settings')">설정</div>
+</div>
+
+<!-- 새 기록 -->
+<div class="page active" id="tab-input">
+
+  <div class="mode-tabs">
+    <button class="mode-btn active" id="modeText"    onclick="switchMode('text')">✏️ 텍스트</button>
+    <button class="mode-btn"        id="modeVoice"   onclick="switchMode('voice')">🎤 음성</button>
+    <button class="mode-btn"        id="modePhoto"   onclick="switchMode('photo')">📷 카메라</button>
+    <button class="mode-btn"        id="modeGallery" onclick="switchMode('gallery')">🖼️ 갤러리</button>
+  </div>
+
+  <!-- 텍스트 -->
+  <div class="card" id="textCard">
+    <div class="card-label">상담 내용 입력</div>
+    <textarea id="rawInput" placeholder="예: 홍길동 고객, 010-1234-5678, 카카오로 연락. 씰 시승 문의. 경기도 거주. 이번주 일요일 10시 방문 예정&#10;&#10;자유롭게 입력하세요 →"></textarea>
+    <div class="hint">AI가 연락처 / 고객명 / 차종 / 컨택유형 / 다음액션으로 자동 분류합니다</div>
+    <div style="margin-top:10px;">
+      <button class="btn btn-primary" id="analyzeBtn" onclick="analyzeText()">
+        <span id="btnContent">✦ &nbsp;AI로 자동 정리</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 음성 -->
+  <div class="card" id="voiceCard" style="display:none;">
+    <div class="card-label">음성으로 입력</div>
+    <div class="voice-wrap">
+      <div class="voice-circle" id="voiceCircle" onclick="toggleVoice()">🎤</div>
+      <div class="voice-status" id="voiceStatus">탭하여 녹음 시작</div>
+    </div>
+    <div id="voiceTranscript" style="display:none;margin-bottom:12px;">
+      <div class="card-label">인식된 내용</div>
+      <div id="transcriptText" style="font-size:14px;color:var(--text);line-height:1.7;background:var(--surface2);padding:12px;border-radius:var(--radius-sm);"></div>
+    </div>
+    <div class="hint">고객명, 연락처, 차종, 다음 약속 등을 포함해서 말씀해주세요</div>
+    <div style="margin-top:10px;">
+      <button class="btn btn-primary" id="analyzeVoiceBtn" onclick="analyzeVoice()" disabled>
+        <span id="btnVoiceContent">음성을 먼저 녹음해주세요</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 사진 -->
+  <div class="card" id="photoCard" style="display:none;">
+    <div class="card-label" id="photoCardLabel">고객 카드 / 대화 캡처</div>
+    <input type="file" id="cameraInput"      accept="image/*" capture="environment" style="display:none;" onchange="handlePhoto(this)">
+    <input type="file" id="galleryFileInput" accept="image/*"                       style="display:none;" onchange="handlePhoto(this)">
+    <div id="photoPreview" style="display:none;margin-bottom:12px;">
+      <img id="previewImg">
+      <button class="clear-photo" onclick="clearPhoto()">✕ 사진 제거</button>
+    </div>
+    <div id="photoPlaceholder">
+      <div class="photo-drop" onclick="triggerPhoto()">
+        <div style="font-size:36px;margin-bottom:8px;" id="photoIcon">📷</div>
+        <div style="font-size:14px;font-weight:500;margin-bottom:4px;" id="photoTitle">탭하여 촬영</div>
+        <div style="font-size:12px;color:var(--text3);">명함 · 고객카드 · 카카오 대화 캡처 모두 인식</div>
+      </div>
+    </div>
+    <div class="hint" style="margin-top:10px;">카카오 대화 캡처 시 → 왼쪽(고객) 메시지에서 정보 추출, 오른쪽(내 메시지) 무시</div>
+    <div style="margin-top:10px;">
+      <button class="btn btn-primary" id="analyzePhotoBtn" onclick="analyzePhoto()" disabled>
+        <span id="btnPhotoContent">사진을 먼저 선택해주세요</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 결과 -->
+  <div id="resultSection" style="display:none;">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="card-label" style="margin:0;">정리된 내용</div>
+        <span style="font-size:11px;color:var(--text3);">수정 가능</span>
+      </div>
+      <div class="result-grid">
+        <div class="result-row"><span class="result-key">날짜</span><input class="result-input" id="f-date"></div>
+        <div class="result-row"><span class="result-key">고객명</span><input class="result-input" id="f-name"></div>
+        <div class="result-row"><span class="result-key">연락처</span><input class="result-input" id="f-phone" type="tel" placeholder="010-0000-0000"></div>
+        <div class="result-row"><span class="result-key">관심차종</span><input class="result-input" id="f-car"></div>
+        <div class="result-row"><span class="result-key">컨택유형</span><input class="result-input" id="f-contact"></div>
+        <div class="result-row"><span class="result-key">주요관심사</span><input class="result-input" id="f-interest"></div>
+        <div class="result-row"><span class="result-key">다음액션</span><input class="result-input" id="f-next"></div>
+        <div class="result-row"><span class="result-key">메모</span><input class="result-input" id="f-memo"></div>
+      </div>
+    </div>
+    <button class="btn btn-save" id="saveBtn" onclick="saveRecord()" style="margin-bottom:8px;">
+      <span id="saveBtnContent">💾 &nbsp;저장 (시트 + 노션 + 로컬)</span>
+    </button>
+    <div id="saveStatus" style="min-height:28px;"></div>
+  </div>
+
+</div>
+
+<!-- 기록 목록 -->
+<div class="page" id="tab-history">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <span style="font-size:14px;font-weight:500;">저장된 기록</span>
+    <span class="count-pill" id="totalCount">0건</span>
+  </div>
+  <div id="historyList"></div>
+</div>
+
+<!-- 설정 -->
+<div class="page" id="tab-settings">
+  <div class="card">
+    <div class="card-label">저장 연동</div>
+    <div class="setting-row">
+      <div class="setting-label">Apps Script 웹훅 URL</div>
+      <input type="url" id="webhookUrl" placeholder="https://script.google.com/macros/s/..." oninput="saveSettings()">
+      <div class="setting-desc">이 웹훅 하나로 구글 시트 + 노션에 동시 저장됩니다</div>
+    </div>
+    <button class="btn btn-outline" onclick="testWebhook()" style="height:40px;font-size:13px;">연결 테스트</button>
+    <div id="webhookTestStatus"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Claude API</div>
+    <div class="setting-row">
+      <div class="setting-label">API 키</div>
+      <input type="text" id="apiKey" placeholder="sk-ant-..." oninput="saveSettings()">
+      <div class="setting-desc">Anthropic Console에서 발급. 기기에만 저장됩니다.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">저장 현황</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <span style="font-size:14px;">로컬 기록</span>
+      <span class="count-pill" id="settingsCount">0건</span>
+    </div>
+    <button class="btn btn-outline" onclick="clearAll()" style="height:40px;font-size:13px;color:var(--red);border-color:rgba(224,90,90,0.3);">전체 기록 삭제</button>
+  </div>
+
+  <div class="card" style="border-color:rgba(232,213,163,0.2);">
+    <div class="card-label">저장 흐름</div>
+    <div class="info-box">
+      앱에서 저장 버튼<br>
+      → Apps Script 웹훅 (1개 URL)<br>
+      → 구글 시트 자동 저장 ✓<br>
+      → 노션 BYD 고객 관리 DB 자동 저장 ✓<br>
+      → 기기 로컬 저장 ✓
+    </div>
+  </div>
+
+  <div class="card" style="border-color:rgba(232,213,163,0.2);">
+    <div class="card-label">홈화면 추가</div>
+    <div style="font-size:13px;color:var(--text2);line-height:2.2;">
+      ① 크롬에서 이 페이지 열기<br>
+      ② 우측 상단 메뉴 (⋮) 탭<br>
+      ③ <strong style="color:var(--accent);">"홈 화면에 추가"</strong> 선택
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'byd_v4';
+let currentMode = 'text';
+let imgBase64 = null, imgType = 'image/jpeg';
+let recognition = null, isRecording = false, voiceText = '';
+
+const $ = id => document.getElementById(id);
+
+function today() {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+}
+
+function cfg() {
+  return {
+    webhook: localStorage.getItem('byd_webhook')||'',
+    apiKey:  localStorage.getItem('byd_apikey')||''
+  };
+}
+
+function saveSettings() {
+  localStorage.setItem('byd_webhook', $('webhookUrl').value.trim());
+  localStorage.setItem('byd_apikey',  $('apiKey').value.trim());
+  updateConn();
+
+// ── PWA Service Worker 등록 ──
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.log('SW 등록 완료'))
+      .catch(e => console.log('SW 등록 실패:', e));
+  });
+}
+
+// ── 견적기에서 넘어온 파라미터 자동 입력 ──
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('from') === 'quotation') {
+    const name  = params.get('name')  || '';
+    const car   = params.get('car')   || '';
+    const quote = params.get('quote') || '';
+
+    if (name || car || quote) {
+      // 결과 필드에 자동 입력
+      if (name)  document.getElementById('f-name').value = name;
+      if (car)   document.getElementById('f-car').value  = car;
+      if (quote) document.getElementById('f-memo').value = '견적: ' + quote;
+
+      // 오늘 날짜 자동 입력
+      document.getElementById('f-date').value = (function(){
+        const n = new Date();
+        return n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' + String(n.getDate()).padStart(2,'0');
+      })();
+
+      // 결과 섹션 바로 표시
+      document.getElementById('resultSection').style.display = 'block';
+
+      // 안내 토스트
+      setTimeout(() => {
+        document.getElementById('saveStatus').innerHTML =
+          '<span class="badge badge-info"><span class="dot"></span>견적기에서 데이터를 불러왔습니다. 나머지 정보를 입력 후 저장해주세요.</span>';
+      }, 300);
+    }
+  }
+})();
+}
+
+function updateConn() {
+  const ok = !!cfg().webhook;
+  $('connDot').classList.toggle('on', ok);
+  $('connLabel').textContent = ok ? '시트+노션 연결됨' : '미연결';
+  $('connLabel').style.color = ok ? '#5aaa7a' : '';
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['input','history','settings'][i]===tab));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  $('tab-'+tab).classList.add('active');
+  if (tab==='history') renderHistory();
+  if (tab==='settings') renderSettings();
+}
+
+function switchMode(m) {
+  currentMode = m;
+  ['text','voice','photo','gallery'].forEach(k => {
+    const el = $('mode'+k.charAt(0).toUpperCase()+k.slice(1));
+    if (el) el.classList.toggle('active', k===m);
+  });
+  $('textCard').style.display  = m==='text'  ? 'block':'none';
+  $('voiceCard').style.display = m==='voice' ? 'block':'none';
+  $('photoCard').style.display = (m==='photo'||m==='gallery') ? 'block':'none';
+  if (m==='photo') {
+    $('photoCardLabel').textContent='고객 카드 / 대화 캡처 촬영';
+    $('photoIcon').textContent='📷'; $('photoTitle').textContent='탭하여 촬영';
+  } else if (m==='gallery') {
+    $('photoCardLabel').textContent='갤러리에서 선택';
+    $('photoIcon').textContent='🖼️'; $('photoTitle').textContent='탭하여 사진 선택';
+  }
+}
+
+// ── 음성 ──
+function toggleVoice() {
+  if (!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)) {
+    alert('크롬 브라우저에서만 음성인식이 가능합니다.'); return;
+  }
+  isRecording ? stopVoice() : startVoice();
+}
+
+function startVoice() {
+  const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang='ko-KR'; recognition.continuous=true; recognition.interimResults=true;
+  voiceText='';
+  recognition.onstart = () => {
+    isRecording=true;
+    $('voiceCircle').classList.add('recording');
+    $('voiceCircle').textContent='⏹';
+    $('voiceStatus').textContent='녹음 중... (탭하여 중지)';
+    $('voiceStatus').style.color='var(--red)';
+  };
+  recognition.onresult = e => {
+    let fin='', int='';
+    for (let i=e.resultIndex;i<e.results.length;i++) {
+      if (e.results[i].isFinal) fin+=e.results[i][0].transcript;
+      else int+=e.results[i][0].transcript;
+    }
+    voiceText+=fin;
+    const txt=voiceText+int;
+    $('transcriptText').textContent=txt;
+    $('voiceTranscript').style.display='block';
+    if (txt) { $('analyzeVoiceBtn').disabled=false; $('btnVoiceContent').innerHTML='✦ &nbsp;AI로 자동 정리'; }
+  };
+  recognition.onerror = () => stopVoice();
+  recognition.onend   = () => { if (isRecording) stopVoice(); };
+  recognition.start();
+}
+
+function stopVoice() {
+  isRecording=false;
+  if (recognition) recognition.stop();
+  $('voiceCircle').classList.remove('recording');
+  $('voiceCircle').textContent='🎤';
+  $('voiceStatus').textContent='녹음 완료. 아래 버튼으로 정리하세요.';
+  $('voiceStatus').style.color='var(--green)';
+}
+
+async function analyzeVoice() {
+  const txt=$('transcriptText').textContent.trim();
+  if (!txt) { alert('음성 내용이 없습니다'); return; }
+  $('rawInput').value=txt;
+  switchMode('text');
+  await analyzeText();
+}
+
+// ── 사진 ──
+function triggerPhoto() {
+  currentMode==='photo' ? $('cameraInput').click() : $('galleryFileInput').click();
+}
+function handlePhoto(input) {
+  const file=input.files[0]; if (!file) return;
+  imgType=file.type||'image/jpeg';
+  const r=new FileReader();
+  r.onload=e=>{
+    imgBase64=e.target.result.split(',')[1];
+    $('previewImg').src=e.target.result;
+    $('photoPreview').style.display='block';
+    $('photoPlaceholder').style.display='none';
+    $('analyzePhotoBtn').disabled=false;
+    $('btnPhotoContent').innerHTML='✦ &nbsp;사진 분석하기';
+  };
+  r.readAsDataURL(file); input.value='';
+}
+function clearPhoto() {
+  imgBase64=null;
+  $('photoPreview').style.display='none';
+  $('photoPlaceholder').style.display='block';
+  $('analyzePhotoBtn').disabled=true;
+  $('btnPhotoContent').textContent='사진을 먼저 선택해주세요';
+}
+
+// ── Claude API ──
+async function claude(messages) {
+  const {apiKey}=cfg();
+  if (!apiKey) { alert('설정 탭에서 API 키를 먼저 입력해주세요.'); return null; }
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages})
+  });
+  const d=await res.json();
+  if (d.error) throw new Error(`API 오류 [${d.error.type}]: ${d.error.message}`);
+  return d;
+}
+
+function jsonPrompt() {
+  return `반드시 JSON만 출력 (마크다운, 설명 없이):
+{
+  "date":"날짜(YYYY-MM-DD, 없으면 ${today()})",
+  "name":"고객명(없으면 미상)",
+  "phone":"연락처(010-XXXX-XXXX, 없으면 빈문자열)",
+  "car":"관심차종(씰/아토3/한/돌핀/씰U 중 하나, 없으면 미정)",
+  "contact":"컨택유형(방문/전화/문자/카카오/SNS/기타)",
+  "interest":"주요 관심사 요약(1-2줄)",
+  "next":"다음 액션(없으면 추후 연락)",
+  "memo":"기타 메모(없으면 빈문자열)"
+}`;
+}
+
+async function analyzeText() {
+  const raw=$('rawInput').value.trim();
+  if (!raw) { alert('상담 내용을 입력해주세요'); return; }
+  const btn=$('analyzeBtn'); btn.disabled=true;
+  $('btnContent').innerHTML='<span class="spinner spinner-light"></span>&nbsp; AI 분석 중...';
+  try {
+    const prompt = `자동차 영업사원의 고객 상담 또는 대화 내용에서 고객 정보를 추출해줘.
+
+[분석 규칙]
+1. 고객명: 고객이 직접 이름을 말한 경우 추출 (예: "이준형이고", "홍길동입니다", "존함은 OOO")
+2. 연락처: 010-XXXX-XXXX 형식 추출
+3. 관심차종: 씰/아토3/한/돌핀/씰U 중 언급된 차종
+4. 컨택유형: 카카오/문자/전화/방문/SNS 중 해당
+5. 다음액션: 대화 흐름에서 합의된 약속을 구체적으로 추출
+   예) 영업사원이 "일요일에 뵙겠습니다" + 고객이 "10시 좀 지나서 방문하겠습니다" → "일요일 10시 이후 방문 예정"
+6. 주요관심사: 고객이 관심 표현한 내용 (시승, 가격, 충전 등)
+7. 메모: 거주지, 특이사항 등
+
+입력 내용:
+"${raw}"
+
+${jsonPrompt()}`;
+    const d=await claude([{role:'user',content:prompt}]);
+    if (d) fillResult(d);
+  } catch(e){alert('분석 실패: '+e.message);}
+  finally{btn.disabled=false;$('btnContent').innerHTML='✦ &nbsp;AI로 자동 정리';}
+}
+
+async function analyzePhoto() {
+  if (!imgBase64){alert('사진을 먼저 선택해주세요');return;}
+  const btn=$('analyzePhotoBtn'); btn.disabled=true;
+  $('btnPhotoContent').innerHTML='<span class="spinner spinner-light"></span>&nbsp; 사진 분석 중...';
+  try {
+    const d=await claude([{role:'user',content:[
+      {type:'image',source:{type:'base64',media_type:imgType,data:imgBase64}},
+      {type:'text',text:`이 이미지는 자동차 영업사원의 고객 대화 캡처 또는 고객 정보 카드입니다. 아래 규칙에 따라 고객 정보를 최대한 정확하게 추출해줘.
+
+[카카오톡 / 문자 대화 캡처인 경우]
+1. 말풍선 구분:
+   - 왼쪽 말풍선 = 고객이 보낸 메시지 → 정보 추출 대상
+   - 오른쪽 말풍선 = 영업사원(나)이 보낸 메시지 → 완전히 무시
+
+2. 고객 연락처:
+   - 화면 상단에 표시된 전화번호가 있으면 고객 연락처로 추출
+
+3. 고객명 추출 방법:
+   - 고객이 대화 중에 직접 자신의 이름을 말한 경우 (예: "저는 홍길동이고요", "홍길동입니다") → 그 이름 추출
+   - 이름 언급이 없으면 미상으로 처리
+
+4. 관심 차종 추출 방법:
+   - 고객 메시지에서 차종명 언급 찾기 (씰, 아토3, 한, 돌핀, 씰U 등)
+   - "씰 보고있습니다", "아토3 문의드려요" 같은 표현에서 추출
+
+5. 컨택 유형:
+   - 카카오톡 대화면 → 카카오
+   - 문자면 → 문자
+
+6. 다음 액션:
+   - 고객이 언급한 방문 날짜, 시간, 약속 내용을 추출
+   - 예: "일요일 10시 방문 예정", "토요일 시승 원함"
+
+[명함 / 고객 정보 카드인 경우]
+- 모든 텍스트 정보를 추출
+
+${jsonPrompt()}`}
+    ]}]);
+    if (d) fillResult(d);
+  } catch(e){alert('분석 실패: '+e.message);}
+  finally{btn.disabled=false;$('btnPhotoContent').innerHTML='✦ &nbsp;사진 분석하기';}
+}
+
+function fillResult(d) {
+  const txt=(d.content||[]).map(i=>i.text||'').join('');
+  if (!txt) throw new Error('AI 응답 없음');
+  const p=JSON.parse(txt.replace(/```json|```/g,'').trim());
+  ['date','name','phone','car','contact','interest','next','memo'].forEach(k=>{
+    const el=$('f-'+k); if(el) el.value=p[k]||'';
+  });
+  if (!p.date) $('f-date').value=today();
+  $('resultSection').style.display='block';
+  $('saveStatus').innerHTML='';
+  $('resultSection').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function fields() {
+  return {
+    date:$('f-date').value, name:$('f-name').value, phone:$('f-phone').value,
+    car:$('f-car').value, contact:$('f-contact').value, interest:$('f-interest').value,
+    next:$('f-next').value, memo:$('f-memo').value,
+    savedAt:new Date().toLocaleString('ko-KR')
+  };
+}
+
+async function saveRecord() {
+  const record=fields();
+  const btn=$('saveBtn'); btn.disabled=true;
+  $('saveBtnContent').innerHTML='<span class="spinner spinner-light"></span>&nbsp; 저장 중...';
+
+  // 로컬 저장
+  const list=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+  list.unshift(record); if(list.length>200) list.pop();
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(list));
+
+  // 웹훅 (구글시트 + 노션)
+  const {webhook}=cfg();
+  let msg='로컬 ✓';
+  if (webhook) {
+    try {
+      await fetch(webhook,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(record)});
+      msg='로컬 ✓ · 시트 ✓ · 노션 ✓';
+    } catch(e){ msg='로컬 ✓ · 전송 실패'; }
+  } else { msg='로컬 ✓ · 웹훅 미설정'; }
+
+  const ok=msg.includes('노션 ✓')||msg.includes('로컬 ✓');
+  $('saveStatus').innerHTML=`<span class="badge ${ok?'badge-ok':'badge-info'}"><span class="dot"></span>${msg}</span>`;
+
+  if (ok) {
+    setTimeout(()=>{
+      $('rawInput').value='';
+      $('transcriptText').textContent='';
+      $('voiceTranscript').style.display='none';
+      voiceText='';
+      clearPhoto();
+      $('resultSection').style.display='none';
+      $('saveStatus').innerHTML='';
+    },2200);
+  }
+  btn.disabled=false;
+  $('saveBtnContent').textContent='💾 저장 (시트 + 노션 + 로컬)';
+}
+
+async function testWebhook() {
+  const url=$('webhookUrl').value.trim();
+  if (!url){alert('URL을 먼저 입력해주세요');return;}
+  $('webhookTestStatus').innerHTML='<span class="badge badge-info"><span class="dot"></span>테스트 중...</span>';
+  try {
+    const res=await fetch(url);
+    const d=await res.json();
+    $('webhookTestStatus').innerHTML=d.result==='ok'
+      ?'<span class="badge badge-ok"><span class="dot"></span>연결 성공 ✓</span>'
+      :'<span class="badge badge-err"><span class="dot"></span>응답 오류</span>';
+  } catch(e){
+    $('webhookTestStatus').innerHTML='<span class="badge badge-err"><span class="dot"></span>연결 실패</span>';
+  }
+}
+
+function getRecords(){return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');}
+
+function renderHistory() {
+  const list=getRecords();
+  $('totalCount').textContent=list.length+'건';
+  const el=$('historyList');
+  if (!list.length){el.innerHTML='<div class="empty-state">저장된 기록이 없습니다</div>';return;}
+  el.innerHTML=list.map((r,i)=>`
+    <div class="record-item" onclick="loadRecord(${i})">
+      <div class="record-top"><span class="record-name">${r.name||'미상'}</span><span class="record-car">${r.car||'미정'}</span></div>
+      <div class="record-meta">${r.date||''} · ${r.phone||''} · ${r.contact||'-'}</div>
+      <div class="record-next">→ ${r.next||'-'}</div>
+    </div>`).join('');
+}
+
+function loadRecord(i) {
+  const r=getRecords()[i];
+  ['date','name','phone','car','contact','interest','next','memo'].forEach(k=>{
+    const el=$('f-'+k); if(el) el.value=r[k]||'';
+  });
+  $('resultSection').style.display='block';
+  switchTab('input');
+}
+
+function renderSettings() {
+  const s=cfg();
+  $('webhookUrl').value=s.webhook;
+  $('apiKey').value=s.apiKey;
+  $('settingsCount').textContent=getRecords().length+'건';
+}
+
+function clearAll() {
+  if (confirm('저장된 기록을 모두 삭제할까요?')){localStorage.removeItem(STORAGE_KEY);renderSettings();alert('삭제 완료');}
+}
+
+updateConn();
+</script>
+</body>
+</html>
