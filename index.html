@@ -400,16 +400,20 @@ function startVoice() {
     $('voiceStatus').style.color='var(--red)';
   };
   recognition.onresult = e => {
-    let fin='', int='';
+    // 최종 확정 텍스트만 누적 (반복 버그 방지)
+    let newFinal='', interim='';
     for (let i=e.resultIndex;i<e.results.length;i++) {
-      if (e.results[i].isFinal) fin+=e.results[i][0].transcript;
-      else int+=e.results[i][0].transcript;
+      if (e.results[i].isFinal) newFinal+=e.results[i][0].transcript;
+      else interim+=e.results[i][0].transcript;
     }
-    voiceText+=fin;
-    const txt=voiceText+int;
-    $('transcriptText').textContent=txt;
+    if (newFinal) voiceText+=newFinal;
+    const display=voiceText+(interim?' '+interim:'');
+    $('transcriptText').textContent=display;
     $('voiceTranscript').style.display='block';
-    if (txt) { $('analyzeVoiceBtn').disabled=false; $('btnVoiceContent').innerHTML='✦ &nbsp;AI로 자동 정리'; }
+    if (voiceText.trim()) {
+      $('analyzeVoiceBtn').disabled=false;
+      $('btnVoiceContent').innerHTML='✦ &nbsp;AI로 자동 정리';
+    }
   };
   recognition.onerror = () => stopVoice();
   recognition.onend   = () => { if (isRecording) stopVoice(); };
