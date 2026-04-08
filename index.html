@@ -106,6 +106,34 @@
   .count-pill{display:inline-block;font-size:11px;background:var(--surface2);color:var(--text3);padding:1px 7px;border-radius:10px;font-family:'DM Mono',monospace;border:0.5px solid var(--border);}
 
   .info-box{background:rgba(232,213,163,0.06);border:0.5px solid rgba(232,213,163,0.2);border-radius:var(--radius-sm);padding:12px;font-size:12px;color:var(--text2);line-height:1.8;}
+
+  /* 온도 측정 */
+  .temp-hot  { background:rgba(224,90,90,0.15);  color:#e05a5a; border:0.5px solid rgba(224,90,90,0.3);  border-radius:20px; padding:3px 10px; font-size:12px; display:inline-flex; align-items:center; gap:4px; }
+  .temp-warm { background:rgba(232,160,58,0.15); color:#e8a03a; border:0.5px solid rgba(232,160,58,0.3); border-radius:20px; padding:3px 10px; font-size:12px; display:inline-flex; align-items:center; gap:4px; }
+  .temp-cold { background:rgba(90,138,224,0.15); color:#5a8ae0; border:0.5px solid rgba(90,138,224,0.3); border-radius:20px; padding:3px 10px; font-size:12px; display:inline-flex; align-items:center; gap:4px; }
+  .temp-none { background:var(--surface2); color:var(--text3); border:0.5px solid var(--border); border-radius:20px; padding:3px 10px; font-size:12px; display:inline-flex; align-items:center; gap:4px; }
+
+  .temp-result-box { background:var(--surface2); border:0.5px solid var(--border2); border-radius:var(--radius); padding:18px; margin-top:12px; }
+  .temp-score-row  { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .temp-score-big  { font-size:42px; font-weight:700; line-height:1; }
+  .temp-label-big  { font-size:16px; font-weight:600; }
+  .temp-bar-wrap   { height:8px; background:var(--surface); border-radius:4px; overflow:hidden; margin-bottom:14px; }
+  .temp-bar-fill   { height:100%; border-radius:4px; transition:width 0.6s ease; }
+  .temp-section    { margin-bottom:14px; }
+  .temp-section-title { font-size:11px; color:var(--text3); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:6px; }
+  .temp-text       { font-size:13px; color:var(--text); line-height:1.75; }
+  .temp-strategy-item { display:flex; gap:8px; padding:8px 0; border-bottom:0.5px solid var(--border); font-size:13px; color:var(--text); line-height:1.6; }
+  .temp-strategy-item:last-child { border-bottom:none; }
+  .temp-num { color:var(--accent); font-weight:600; min-width:16px; font-family:'DM Mono',monospace; }
+
+  .followup-item { background:var(--surface2); border:0.5px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:8px; display:flex; align-items:center; gap:12px; }
+  .followup-days { font-size:11px; font-family:'DM Mono',monospace; min-width:36px; text-align:center; padding:4px 6px; border-radius:6px; font-weight:600; }
+  .followup-days.urgent { background:rgba(224,90,90,0.15); color:#e05a5a; }
+  .followup-days.soon   { background:rgba(232,160,58,0.15); color:#e8a03a; }
+  .followup-days.ok     { background:rgba(90,170,122,0.15); color:#5aaa7a; }
+  .followup-info { flex:1; }
+  .followup-name { font-size:14px; font-weight:500; }
+  .followup-sub  { font-size:12px; color:var(--text3); margin-top:2px; }
 </style>
 </head>
 <body>
@@ -124,6 +152,8 @@
 <div class="tabs">
   <div class="tab active" onclick="switchTab('input')">✦ 새 기록</div>
   <div class="tab" onclick="switchTab('history')">기록 목록</div>
+  <div class="tab" onclick="switchTab('temperature')">🌡️ 온도</div>
+  <div class="tab" onclick="switchTab('followup')">📋 팔로업</div>
   <div class="tab" onclick="switchTab('settings')">설정</div>
 </div>
 
@@ -210,6 +240,9 @@
         <div class="result-row"><span class="result-key">메모</span><input class="result-input" id="f-memo"></div>
       </div>
     </div>
+    <!-- 인라인 온도 결과 -->
+    <div id="inlineTempResult" style="display:none;background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;"></div>
+
     <button class="btn btn-save" id="saveBtn" onclick="saveRecord()" style="margin-bottom:8px;">
       <span id="saveBtnContent">💾 &nbsp;저장 (시트 + 노션 + 로컬)</span>
     </button>
@@ -231,6 +264,106 @@
     <span class="count-pill" id="totalCount">0건</span>
   </div>
   <div id="historyList"></div>
+</div>
+
+<!-- 온도 측정 -->
+<div class="page" id="tab-temperature">
+  <div class="card">
+    <div class="card-label">가망고객 온도 측정</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:12px;line-height:1.7;">
+      고객과 나눈 문자·카카오·메모 내역을 붙여넣으세요.<br>AI가 관심도를 분석하고 다음 전략을 제안합니다.
+    </div>
+    <textarea id="tempInput" placeholder="예시:
+고객: 씰 가격이 어떻게 되나요?
+나: 씰RWD 기준 4,480만원이고 보조금 받으면 약 3,700만원입니다.
+고객: 아 생각보다 비싸네요
+나: 5년 무상보증에 충전 비용이 월 2만원대라 유지비가 매우 저렴합니다
+고객: 흠... 한번 생각해볼게요
+(3일 후) 나: 안녕하세요! 혹시 결정 하셨나요?
+고객: 아직 고민중이에요" style="min-height:160px;"></textarea>
+
+    <div style="margin-top:10px;display:flex;gap:8px;">
+      <select id="tempCarSelect" style="flex:1;height:44px;background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;padding:0 12px;outline:none;">
+        <option value="">차종 선택 (선택사항)</option>
+        <option>씰RWD</option><option>씰AWD</option><option>씨라이언7</option>
+        <option>아토3</option><option>돌핀</option><option>돌핀Active</option><option>한</option>
+      </select>
+      <button class="btn btn-primary" id="tempBtn" onclick="analyzeTemperature()" style="flex:2;">
+        <span id="tempBtnContent">🌡️ &nbsp;온도 측정</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="tempResult" style="display:none;">
+    <div class="temp-result-box">
+      <div class="temp-score-row">
+        <div>
+          <div id="tempEmoji" style="font-size:32px;margin-bottom:4px;">🌡️</div>
+          <div id="tempLabelBig" class="temp-label-big"></div>
+          <div id="tempBadge" style="margin-top:6px;"></div>
+        </div>
+        <div style="text-align:right;">
+          <div id="tempScoreBig" class="temp-score-big"></div>
+          <div style="font-size:12px;color:var(--text3);margin-top:4px;">/ 100점</div>
+        </div>
+      </div>
+      <div class="temp-bar-wrap"><div id="tempBarFill" class="temp-bar-fill"></div></div>
+
+      <div class="temp-section">
+        <div class="temp-section-title">📍 분석 요약</div>
+        <div id="tempSummary" class="temp-text"></div>
+      </div>
+
+      <div class="temp-section">
+        <div class="temp-section-title">✅ 긍정 신호</div>
+        <div id="tempPositive" class="temp-text"></div>
+      </div>
+
+      <div class="temp-section">
+        <div class="temp-section-title">⚠️ 우려 신호</div>
+        <div id="tempNegative" class="temp-text"></div>
+      </div>
+
+      <div class="temp-section" style="margin-bottom:0;">
+        <div class="temp-section-title">🎯 추천 전략</div>
+        <div id="tempStrategy"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn btn-save" onclick="saveTempToRecord()" style="flex:1;font-size:13px;">💾 현재 기록에 온도 저장</button>
+      <button class="btn btn-outline" onclick="copyTempResult()" style="flex:1;font-size:13px;">📋 결과 복사</button>
+    </div>
+    <div id="tempSaveStatus" style="min-height:24px;margin-top:8px;"></div>
+  </div>
+
+  <!-- 기록에서 선택해서 분석 -->
+  <div class="card" style="margin-top:12px;">
+    <div class="card-label">저장된 기록으로 재분석</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">기존 고객 기록의 메모+관심사를 불러와 온도를 측정합니다</div>
+    <select id="tempRecordSelect" style="width:100%;height:44px;background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;padding:0 12px;outline:none;margin-bottom:10px;">
+      <option value="">고객 선택...</option>
+    </select>
+    <button class="btn btn-outline" onclick="loadRecordForTemp()" style="height:40px;font-size:13px;">불러오기</button>
+  </div>
+</div>
+
+<!-- 팔로업 리스트 -->
+<div class="page" id="tab-followup">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+    <span style="font-size:14px;font-weight:500;">오늘의 팔로업</span>
+    <button onclick="renderFollowup()" style="background:transparent;border:none;color:var(--text3);font-size:13px;cursor:pointer;">↺ 새로고침</button>
+  </div>
+  <div style="font-size:12px;color:var(--text3);margin-bottom:14px;">마지막 상담 기준 연락이 필요한 고객 목록</div>
+
+  <div style="display:flex;gap:6px;margin-bottom:14px;" id="followupFilterRow">
+    <button class="mode-btn active" id="ff-all"    onclick="setFollowupFilter('all')">전체</button>
+    <button class="mode-btn"        id="ff-urgent" onclick="setFollowupFilter('urgent')">🔴 긴급</button>
+    <button class="mode-btn"        id="ff-soon"   onclick="setFollowupFilter('soon')">🟡 예정</button>
+    <button class="mode-btn"        id="ff-ok"     onclick="setFollowupFilter('ok')">🟢 양호</button>
+  </div>
+
+  <div id="followupList"></div>
 </div>
 
 <!-- 설정 -->
@@ -385,11 +518,14 @@ function updateConn() {
 }
 
 function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['input','history','settings'][i]===tab));
+  const tabs = ['input','history','temperature','followup','settings'];
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', tabs[i]===tab));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   $('tab-'+tab).classList.add('active');
-  if (tab==='history') renderHistory();
-  if (tab==='settings') renderSettings();
+  if (tab==='history')     renderHistory();
+  if (tab==='settings')    renderSettings();
+  if (tab==='temperature') renderTempRecordSelect();
+  if (tab==='followup')    renderFollowup();
 }
 
 function switchMode(m) {
@@ -509,113 +645,188 @@ async function claude(messages) {
 }
 
 function jsonPrompt() {
-  return `반드시 JSON만 출력 (마크다운, 설명 없이):
+  return `반드시 JSON만 출력 (마크다운·설명 없이):
 {
   "date":"날짜(YYYY-MM-DD, 없으면 ${today()})",
   "name":"고객명(없으면 미상)",
   "phone":"연락처(010-XXXX-XXXX, 없으면 빈문자열)",
-  "car":"관심차종(아래 차종 매핑 참고하여 정확한 차종명으로 변환, 없으면 미정)",
+  "car":"관심차종(차종 매핑 적용, 없으면 미정)",
   "contact":"컨택유형(방문/전화/문자/카카오/SNS/기타)",
   "interest":"주요 관심사 요약(1-2줄)",
   "next":"다음 액션(없으면 추후 연락)",
-  "memo":"기타 메모(없으면 빈문자열)"
+  "memo":"거주지·특이사항 등(없으면 빈문자열)",
+  "temperature": 0에서 100 사이 정수 또는 null,
+  "tempLevel": "hot" 또는 "warm" 또는 "cold" 또는 null,
+  "tempLabel": "온도 한 줄 요약 또는 빈문자열",
+  "tempPositive": "긍정 신호들 줄바꿈 나열 또는 빈문자열",
+  "tempNegative": "우려 신호들 줄바꿈 나열 또는 빈문자열",
+  "tempStrategies": ["전략1","전략2","전략3"]
 }
 
-[차종 매핑 규칙 - 아래 약칭/별칭을 정확한 차종명으로 변환]
-씨라7, 씨라이언7, sealion7, SL7, 씰라이언 → 씨라이언7
-씰후, 씰rwd, seal rwd, RWD → 씰RWD
-씰사, 씰awd, seal awd, AWD → 씰AWD
-씰, seal → 씰
-돌핀A, 돌핀액티브, dolphin active, active → 돌핀Active
-돌핀, dolphin → 돌핀
-아토, 아토3, atto, atto3 → 아토3
-한, han → 한
-
-입력에서 차종 관련 단어를 찾아 위 매핑으로 변환해줘. 대소문자 무시.`;
+[차종 매핑]
+씨라7/씨라이언7/sealion7/SL7/씰라이언 → 씨라이언7
+씰후/씰rwd/seal rwd/RWD → 씰RWD
+씰사/씰awd/seal awd/AWD → 씰AWD
+씰/seal → 씰
+돌핀A/돌핀액티브/dolphin active → 돌핀Active
+돌핀/dolphin → 돌핀
+아토/아토3/atto/atto3 → 아토3
+한/han → 한`;
 }
 
 async function analyzeText() {
-  const raw=$('rawInput').value.trim();
-  if (!raw) { alert('상담 내용을 입력해주세요'); return; }
-  const btn=$('analyzeBtn'); btn.disabled=true;
-  $('btnContent').innerHTML='<span class="spinner spinner-light"></span>&nbsp; AI 분석 중...';
+  const raw=$("rawInput").value.trim();
+  if (!raw) { alert("상담 내용을 입력해주세요"); return; }
+  const btn=$("analyzeBtn"); btn.disabled=true;
+  $("btnContent").innerHTML='<span class="spinner spinner-light"></span>&nbsp; AI 분석 중...';
   try {
-    const prompt = `자동차 영업사원의 고객 상담 또는 대화 내용에서 고객 정보를 추출해줘.
-
-[분석 규칙]
-1. 고객명: 고객이 직접 이름을 말한 경우 추출 (예: "이준형이고", "홍길동입니다", "존함은 OOO")
-2. 연락처: 010-XXXX-XXXX 형식 추출
-3. 관심차종: 씰/아토3/한/돌핀/씰U 중 언급된 차종
-4. 컨택유형: 카카오/문자/전화/방문/SNS 중 해당
-5. 다음액션: 대화 흐름에서 합의된 약속을 구체적으로 추출
-   예) 영업사원이 "일요일에 뵙겠습니다" + 고객이 "10시 좀 지나서 방문하겠습니다" → "일요일 10시 이후 방문 예정"
-6. 주요관심사: 고객이 관심 표현한 내용 (시승, 가격, 충전 등)
-7. 메모: 거주지, 특이사항 등
-
-입력 내용:
-"${raw}"
-
-${jsonPrompt()}`;
-    const d=await claude([{role:'user',content:prompt}]);
+    const prompt = [
+      "당신은 BYD 전기차 전문 영업 어시스턴트입니다. 아래 고객 상담 내용에서 정보를 추출하고 구매 관심도(온도)도 함께 분석해주세요.",
+      "",
+      "[정보 추출 규칙]",
+      "1. 고객명: 고객이 직접 이름을 말한 경우만 추출",
+      "2. 연락처: 010-XXXX-XXXX 형식 추출",
+      "3. 관심차종: 언급된 BYD 차종 (차종 매핑 적용)",
+      "4. 컨택유형: 카카오/문자/전화/방문/SNS 중 해당",
+      "5. 다음액션: 합의된 약속을 구체적으로 추출",
+      "6. 주요관심사: 시승/가격/충전/보조금 등",
+      "7. 메모: 거주지, 특이사항",
+      "",
+      "[온도 분석 기준 0~100점]",
+      "구매 의지 신호(+점수):",
+      "- 고객이 먼저 연락 (+20)",
+      "- 구체적 방문 날짜/시간 확정 (+25)",
+      "- 이름을 자발적으로 밝힘 (+10)",
+      "- 시승 적극 요청 (+15)",
+      "- 가격/보조금/금융 구체적 질문 (+10)",
+      "- 빠른 답장, 이모지, 친근한 말투 (+10)",
+      "- 차종을 직접 언급 (+10)",
+      "우려 신호(-점수):",
+      "- 생각해볼게요/나중에/모르겠어요 (-20)",
+      "- 짧은 단답, 무관심한 반응 (-15)",
+      "- 가격에만 집중, 부정적 반응 (-10)",
+      "",
+      "입력 내용:",
+      JSON.stringify(raw),
+      "",
+      jsonPrompt()
+    ].join("\n");
+    const d=await claude([{role:"user",content:prompt}]);
     if (d) fillResult(d);
-  } catch(e){alert('분석 실패: '+e.message);}
-  finally{btn.disabled=false;$('btnContent').innerHTML='✦ &nbsp;AI로 자동 정리';}
+  } catch(e){alert("분석 실패: "+e.message);}
+  finally{btn.disabled=false;$("btnContent").innerHTML="✦ &nbsp;AI로 자동 정리";}
 }
 
 async function analyzePhoto() {
-  if (!imgBase64){alert('사진을 먼저 선택해주세요');return;}
-  const btn=$('analyzePhotoBtn'); btn.disabled=true;
-  $('btnPhotoContent').innerHTML='<span class="spinner spinner-light"></span>&nbsp; 사진 분석 중...';
+  if (!imgBase64){alert("사진을 먼저 선택해주세요");return;}
+  const btn=$("analyzePhotoBtn"); btn.disabled=true;
+  $("btnPhotoContent").innerHTML='<span class="spinner spinner-light"></span>&nbsp; 사진 분석 중...';
+  const photoPromptText = [
+    "당신은 BYD 전기차 전문 영업 어시스턴트입니다.",
+    "이 이미지(카카오톡/문자 대화 캡처 또는 고객 정보 카드)에서 고객 정보를 추출하고, 구매 관심도(온도)도 함께 분석해주세요.",
+    "",
+    "[말풍선 구분 - 매우 중요]",
+    "- 왼쪽 말풍선 = 고객 메시지 → 분석 대상",
+    "- 오른쪽 말풍선 = 영업사원(나) 메시지 → 맥락 파악용으로만 활용",
+    "- 화면 상단 숫자 = 고객 전화번호",
+    "",
+    "[정보 추출]",
+    "1. 고객 전화번호: 상단 또는 대화 중 언급된 번호",
+    "2. 고객명: 고객이 직접 밝힌 이름만 (예: 이준형이고, OOO입니다)",
+    "3. 관심차종: 고객 메시지에서 BYD 차종 언급 찾기",
+    "4. 다음액션: 방문 날짜/시간 등 확정된 약속을 구체적으로",
+    "5. 거주지: 고객이 언급한 지역",
+    "",
+    "[온도 분석 - 고객 메시지 패턴 종합 판단 0~100점]",
+    "구매 의지 높음(+점수):",
+    "- 고객이 먼저 시승/문의 연락 (+20)",
+    "- 구체적 방문 날짜/시간 직접 확정 (+25)",
+    "- 이름을 자발적으로 밝힘 (+10)",
+    "- 시승 적극 요청 (+15)",
+    "- 하트/이모지 등 호감 표현 (+10)",
+    "- 빠른 답장, 적극적 소통 (+10)",
+    "- 차종을 직접 특정하여 언급 (+10)",
+    "우려 신호(-점수):",
+    "- 짧은 단답, 무관심한 반응 (-15)",
+    "- 생각해볼게요/나중에 등 회피 (-20)",
+    "- 가격에만 집착, 부정적 반응 (-10)",
+    "",
+    "[명함/고객카드인 경우]",
+    "- 모든 텍스트 정보 추출, 온도는 null 처리",
+    "",
+    jsonPrompt()
+  ].join("\n");
   try {
-    const d=await claude([{role:'user',content:[
-      {type:'image',source:{type:'base64',media_type:imgType,data:imgBase64}},
-      {type:'text',text:`이 이미지는 자동차 영업사원의 고객 대화 캡처 또는 고객 정보 카드입니다. 아래 규칙에 따라 고객 정보를 최대한 정확하게 추출해줘.
-
-[카카오톡 / 문자 대화 캡처인 경우]
-1. 말풍선 구분:
-   - 왼쪽 말풍선 = 고객이 보낸 메시지 → 정보 추출 대상
-   - 오른쪽 말풍선 = 영업사원(나)이 보낸 메시지 → 완전히 무시
-
-2. 고객 연락처:
-   - 화면 상단에 표시된 전화번호가 있으면 고객 연락처로 추출
-
-3. 고객명 추출 방법:
-   - 고객이 대화 중에 직접 자신의 이름을 말한 경우 (예: "저는 홍길동이고요", "홍길동입니다") → 그 이름 추출
-   - 이름 언급이 없으면 미상으로 처리
-
-4. 관심 차종 추출 방법:
-   - 고객 메시지에서 차종명 언급 찾기 (씰, 아토3, 한, 돌핀, 씰U 등)
-   - "씰 보고있습니다", "아토3 문의드려요" 같은 표현에서 추출
-
-5. 컨택 유형:
-   - 카카오톡 대화면 → 카카오
-   - 문자면 → 문자
-
-6. 다음 액션:
-   - 고객이 언급한 방문 날짜, 시간, 약속 내용을 추출
-   - 예: "일요일 10시 방문 예정", "토요일 시승 원함"
-
-[명함 / 고객 정보 카드인 경우]
-- 모든 텍스트 정보를 추출
-
-${jsonPrompt()}`}
+    const d=await claude([{role:"user",content:[
+      {type:"image",source:{type:"base64",media_type:imgType,data:imgBase64}},
+      {type:"text",text:photoPromptText}
     ]}]);
     if (d) fillResult(d);
-  } catch(e){alert('분석 실패: '+e.message);}
-  finally{btn.disabled=false;$('btnPhotoContent').innerHTML='✦ &nbsp;사진 분석하기';}
+  } catch(e){alert("분석 실패: "+e.message);}
+  finally{btn.disabled=false;$("btnPhotoContent").innerHTML="✦ &nbsp;사진 분석하기";}
 }
 
 function fillResult(d) {
-  const txt=(d.content||[]).map(i=>i.text||'').join('');
-  if (!txt) throw new Error('AI 응답 없음');
-  const p=JSON.parse(txt.replace(/```json|```/g,'').trim());
-  ['date','name','phone','car','contact','interest','next','memo'].forEach(k=>{
-    const el=$('f-'+k); if(el) el.value=p[k]||'';
+  const txt=(d.content||[]).map(i=>i.text||"").join("");
+  if (!txt) throw new Error("AI 응답 없음");
+  const p=JSON.parse(txt.replace(/```json|```/g,"").trim());
+  ["date","name","phone","car","contact","interest","next","memo"].forEach(k=>{
+    const el=$("f-"+k); if(el) el.value=p[k]||"";
   });
-  if (!p.date) $('f-date').value=today();
-  $('resultSection').style.display='block';
-  $('saveStatus').innerHTML='';
-  $('resultSection').scrollIntoView({behavior:'smooth',block:'start'});
+  if (!p.date) $("f-date").value=today();
+
+  // 온도 인라인 표시
+  const tempWrap = document.getElementById("inlineTempResult");
+  if (p.temperature != null && tempWrap) {
+    lastTempData = {
+      score: p.temperature,
+      level: p.tempLevel || (p.temperature>=70?"hot":p.temperature>=40?"warm":"cold"),
+      label: p.tempLabel || "",
+      summary: p.interest || "",
+      positive: p.tempPositive || "",
+      negative: p.tempNegative || "",
+      strategies: p.tempStrategies || []
+    };
+    const lv = lastTempData.level;
+    const cfgs = {
+      hot:  {emoji:"🔥", color:"#e05a5a", cls:"temp-hot",  txt:"HIGH"},
+      warm: {emoji:"🌤️", color:"#e8a03a", cls:"temp-warm", txt:"MID"},
+      cold: {emoji:"❄️", color:"#5a8ae0", cls:"temp-cold", txt:"LOW"}
+    };
+    const c = cfgs[lv] || cfgs.warm;
+    const strats = (p.tempStrategies||[]).map((s,i)=>
+      '<div style="font-size:12px;color:var(--text2);padding:3px 0;">'+( i+1)+'. '+s+'</div>'
+    ).join("");
+    const stratHtml = strats ? '<div style="font-size:11px;color:var(--text3);margin-bottom:4px;margin-top:8px;">추천 전략</div>'+strats : "";
+    tempWrap.style.display = "block";
+    tempWrap.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'+
+        '<div style="display:flex;align-items:center;gap:8px;">'+
+          '<span style="font-size:22px;">'+c.emoji+'</span>'+
+          '<div>'+
+            '<span class="'+c.cls+'" style="font-size:13px;">'+c.emoji+' '+c.txt+' · '+p.temperature+'점</span>'+
+            '<div style="font-size:12px;color:var(--text3);margin-top:3px;">'+( p.tempLabel||"")+'</div>'+
+          '</div>'+
+        '</div>'+
+        '<button onclick="showFullTempFromInline()" style="background:transparent;border:0.5px solid var(--border2);border-radius:6px;color:var(--accent);font-size:11px;padding:5px 10px;cursor:pointer;font-family:inherit;">상세보기</button>'+
+      '</div>'+
+      '<div style="height:5px;background:var(--surface);border-radius:3px;overflow:hidden;margin-bottom:6px;">'+
+        '<div style="height:100%;width:'+p.temperature+'%;background:'+c.color+';border-radius:3px;"></div>'+
+      '</div>'+
+      stratHtml;
+  } else if (tempWrap) {
+    tempWrap.style.display = "none";
+  }
+
+  $("resultSection").style.display="block";
+  $("saveStatus").innerHTML="";
+  $("resultSection").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function showFullTempFromInline() {
+  if (!lastTempData) return;
+  showTempResult(lastTempData);
+  switchTab("temperature");
 }
 
 function fields() {
@@ -623,6 +834,7 @@ function fields() {
     date:$('f-date').value, name:$('f-name').value, phone:$('f-phone').value,
     car:$('f-car').value, contact:$('f-contact').value, interest:$('f-interest').value,
     next:$('f-next').value, memo:$('f-memo').value,
+    temperature: null, tempLabel: '', tempLevel: '',
     savedAt:new Date().toLocaleString('ko-KR')
   };
 }
@@ -919,6 +1131,13 @@ function downloadVCard() {
 
 function getRecords(){return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');}
 
+function tempBadgeHtml(temp) {
+  if (!temp) return '';
+  if (temp >= 70) return `<span class="temp-hot">🔥 ${temp}점</span>`;
+  if (temp >= 40) return `<span class="temp-warm">🌤 ${temp}점</span>`;
+  return `<span class="temp-cold">❄️ ${temp}점</span>`;
+}
+
 function renderHistory() {
   const list=getRecords();
   $('totalCount').textContent=list.length+'건';
@@ -927,9 +1146,13 @@ function renderHistory() {
   el.innerHTML=list.map((r,i)=>`
     <div class="record-item" style="position:relative;">
       <div onclick="loadRecord(${i})" style="padding-right:40px;cursor:pointer;">
-        <div class="record-top"><span class="record-name">${r.name||'미상'}</span><span class="record-car">${r.car||'미정'}</span></div>
+        <div class="record-top">
+          <span class="record-name">${r.name||'미상'}</span>
+          <span class="record-car">${r.car||'미정'}</span>
+        </div>
         <div class="record-meta">${r.date||''} · ${r.phone||''} · ${r.contact||'-'}</div>
         <div class="record-next">→ ${r.next||'-'}</div>
+        ${r.temperature ? `<div style="margin-top:5px;">${tempBadgeHtml(r.temperature)}</div>` : ''}
       </div>
       <button onclick="deleteRecord(${i},event)" style="position:absolute;top:50%;right:10px;transform:translateY(-50%);background:transparent;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:6px;line-height:1;">✕</button>
     </div>`).join('');
@@ -964,6 +1187,183 @@ function renderSettings() {
 
 function clearAll() {
   if (confirm('저장된 기록을 모두 삭제할까요?')){localStorage.removeItem(STORAGE_KEY);renderSettings();alert('삭제 완료');}
+}
+
+// ══════════════════════════════════════
+// 🌡️ 온도 측정
+// ══════════════════════════════════════
+let lastTempData = null;
+
+async function analyzeTemperature() {
+  const text = $('tempInput').value.trim();
+  if (!text) { alert('대화 내용을 입력해주세요'); return; }
+  const car = $('tempCarSelect').value;
+  const btn = $('tempBtn'); btn.disabled = true;
+  $('tempBtnContent').innerHTML = '<span class="spinner spinner-light"></span>&nbsp; 분석 중...';
+  $('tempResult').style.display = 'none';
+  try {
+    const prompt = `당신은 자동차 영업 전문가입니다. BYD 전기차 영업사원의 고객 대화 내용을 분석하여 고객의 구매 관심도(온도)를 측정해주세요.
+${car ? `\n관심 차종: ${car}\n` : ''}
+대화 내용:
+"${text}"
+
+반드시 아래 JSON만 출력하세요 (마크다운, 설명 없이):
+{
+  "score": 0~100 사이 숫자 (구매 관심도. 70이상=뜨거움, 40~69=미지근, 39이하=차가움),
+  "level": "hot" 또는 "warm" 또는 "cold",
+  "label": "한글 한 줄 요약 (예: 가격 민감하나 적극 검토 중)",
+  "summary": "2~3줄 종합 분석. 고객의 현재 상태와 주요 관심/우려 사항 요약",
+  "positive": "긍정적 신호들을 줄바꿈으로 나열 (없으면 없음)",
+  "negative": "우려되는 신호들을 줄바꿈으로 나열 (없으면 없음)",
+  "strategies": ["전략1 (20자 이내)", "전략2 (20자 이내)", "전략3 (20자 이내)"]
+}`;
+    const d = await claude([{role:'user', content: prompt}]);
+    if (!d) return;
+    const txt = (d.content||[]).map(i=>i.text||'').join('');
+    const p = JSON.parse(txt.replace(/```json|```/g,'').trim());
+    lastTempData = p;
+    showTempResult(p);
+  } catch(e) {
+    alert('분석 실패: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    $('tempBtnContent').innerHTML = '🌡️ &nbsp;온도 측정';
+  }
+}
+
+function showTempResult(p) {
+  const score = p.score || 0;
+  const level = p.level || (score>=70?'hot':score>=40?'warm':'cold');
+  const configs = {
+    hot:  { emoji:'🔥', label:'뜨거움 — 적극 공략', barColor:'#e05a5a', badgeClass:'temp-hot',  badge:'🔥 HIGH' },
+    warm: { emoji:'🌤️', label:'미지근 — 지속 관리', barColor:'#e8a03a', badgeClass:'temp-warm', badge:'🌤 MID'  },
+    cold: { emoji:'❄️', label:'차가움 — 재접근 필요', barColor:'#5a8ae0', badgeClass:'temp-cold', badge:'❄️ LOW'  }
+  };
+  const c = configs[level] || configs.warm;
+  $('tempEmoji').textContent = c.emoji;
+  $('tempLabelBig').textContent = c.label;
+  $('tempBadge').innerHTML = `<span class="${c.badgeClass}">${c.badge}</span>`;
+  $('tempScoreBig').textContent = score;
+  $('tempScoreBig').style.color = c.barColor;
+  $('tempBarFill').style.width = score + '%';
+  $('tempBarFill').style.background = c.barColor;
+  $('tempSummary').textContent = p.summary || '';
+  $('tempPositive').innerHTML = (p.positive||'없음').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>`• ${l}`).join('<br>');
+  $('tempNegative').innerHTML = (p.negative||'없음').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>`• ${l}`).join('<br>');
+  $('tempStrategy').innerHTML = (p.strategies||[]).map((s,i)=>`<div class="temp-strategy-item"><span class="temp-num">${i+1}</span><span>${s}</span></div>`).join('');
+  $('tempResult').style.display = 'block';
+  $('tempResult').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function copyTempResult() {
+  if (!lastTempData) return;
+  const p = lastTempData;
+  const text = `[온도 측정 결과]\n점수: ${p.score}점 (${p.label})\n\n분석: ${p.summary}\n\n긍정신호:\n${p.positive}\n\n우려신호:\n${p.negative}\n\n추천전략:\n${(p.strategies||[]).map((s,i)=>`${i+1}. ${s}`).join('\n')}`;
+  navigator.clipboard.writeText(text).then(()=>{
+    $('tempSaveStatus').innerHTML = '<span class="badge badge-ok"><span class="dot"></span>복사 완료</span>';
+    setTimeout(()=>{ $('tempSaveStatus').innerHTML=''; }, 2000);
+  }).catch(()=>{ alert('복사에 실패했습니다. 직접 선택해서 복사해주세요.'); });
+}
+
+function saveTempToRecord() {
+  if (!lastTempData) { alert('먼저 온도 측정을 해주세요'); return; }
+  const list = getRecords();
+  if (!list.length) { alert('먼저 고객 기록을 저장해주세요'); return; }
+  const idx = parseInt($('tempRecordSelect').value);
+  const target = isNaN(idx) ? 0 : idx;
+  list[target].temperature = lastTempData.score;
+  list[target].tempLabel   = lastTempData.label;
+  list[target].tempLevel   = lastTempData.level;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  // 구글시트+노션 동기화
+  const {webhook} = cfg();
+  if (webhook) {
+    const record = {...list[target], action:'update_temperature'};
+    fetch(webhook, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(record)}).catch(()=>{});
+  }
+  $('tempSaveStatus').innerHTML = '<span class="badge badge-ok"><span class="dot"></span>기록에 온도 저장 완료 ✓ (시트+노션 동기화)</span>';
+  setTimeout(()=>{ $('tempSaveStatus').innerHTML=''; }, 2500);
+}
+
+function renderTempRecordSelect() {
+  const list = getRecords();
+  const sel = $('tempRecordSelect');
+  sel.innerHTML = '<option value="">고객 선택...</option>' +
+    list.map((r,i)=>`<option value="${i}">${r.name||'미상'} · ${r.car||'미정'} · ${r.date||''}</option>`).join('');
+}
+
+function loadRecordForTemp() {
+  const idx = parseInt($('tempRecordSelect').value);
+  if (isNaN(idx)) { alert('고객을 선택해주세요'); return; }
+  const r = getRecords()[idx];
+  const text = [
+    r.interest ? `관심사: ${r.interest}` : '',
+    r.memo     ? `메모: ${r.memo}` : '',
+    r.next     ? `다음액션: ${r.next}` : '',
+    r.contact  ? `컨택유형: ${r.contact}` : ''
+  ].filter(Boolean).join('\n');
+  $('tempInput').value = text || '(저장된 내용이 부족합니다. 직접 대화내용을 입력해주세요)';
+  if (r.car) $('tempCarSelect').value = r.car;
+  $('tempInput').scrollIntoView({behavior:'smooth'});
+}
+
+// ══════════════════════════════════════
+// 📋 팔로업 리스트
+// ══════════════════════════════════════
+let followupFilter = 'all';
+
+function setFollowupFilter(f) {
+  followupFilter = f;
+  ['all','urgent','soon','ok'].forEach(k => {
+    $('ff-'+k).classList.toggle('active', k===f);
+  });
+  renderFollowup();
+}
+
+function daysSince(dateStr) {
+  if (!dateStr) return 999;
+  const d = new Date(dateStr);
+  if (isNaN(d)) return 999;
+  return Math.floor((Date.now() - d.getTime()) / 86400000);
+}
+
+function renderFollowup() {
+  const list = getRecords();
+  const el = $('followupList');
+  const enriched = list.map((r, i) => ({...r, idx:i, days:daysSince(r.date)})).sort((a,b)=>b.days-a.days);
+  const filtered = enriched.filter(r => {
+    if (followupFilter==='urgent') return r.days >= 7;
+    if (followupFilter==='soon')   return r.days >= 3 && r.days < 7;
+    if (followupFilter==='ok')     return r.days < 3;
+    return true;
+  });
+  if (!filtered.length) { el.innerHTML='<div class="empty-state">해당 조건의 고객이 없습니다</div>'; return; }
+  el.innerHTML = filtered.map(r => {
+    const d = r.days;
+    const cls = d>=7?'urgent':d>=3?'soon':'ok';
+    const lbl = d===0?'오늘':d>=999?'?':d+'일전';
+    const th = r.temperature ? tempBadgeHtml(r.temperature) : '';
+    return `<div class="followup-item">
+      <div class="followup-days ${cls}">${lbl}</div>
+      <div class="followup-info">
+        <div class="followup-name">${r.name||'미상'} <span style="font-size:11px;color:var(--text3);font-family:monospace;">${r.car||''}</span></div>
+        <div class="followup-sub">${r.next||r.interest||'다음 액션 없음'}</div>
+        ${th?`<div style="margin-top:4px;">${th}</div>`:''}
+      </div>
+      <button onclick="quickFollowup(${r.idx})" style="background:transparent;border:0.5px solid var(--border2);border-radius:8px;color:var(--accent);font-size:11px;padding:6px 10px;cursor:pointer;white-space:nowrap;font-family:inherit;">연락</button>
+    </div>`;
+  }).join('');
+}
+
+function quickFollowup(idx) {
+  const r = getRecords()[idx];
+  if (!r) return;
+  ['date','name','phone','car','contact','interest','next','memo'].forEach(k=>{
+    const el=$('f-'+k); if(el) el.value=r[k]||'';
+  });
+  $('resultSection').style.display='block';
+  switchTab('input');
+  setTimeout(()=>showMessagePopup(), 300);
 }
 
 updateConn();
