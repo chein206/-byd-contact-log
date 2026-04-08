@@ -230,11 +230,12 @@
         <span style="font-size:11px;color:var(--text3);">수정 가능</span>
       </div>
       <div class="result-grid">
-        <div class="result-row"><span class="result-key">날짜</span><input class="result-input" id="f-date"></div>
+        <div class="result-row"><span class="result-key">날짜</span><input class="result-input" id="f-date" placeholder="260408" oninput="autoFormatDate(this)"></div>
         <div class="result-row"><span class="result-key">고객명</span><input class="result-input" id="f-name"></div>
-        <div class="result-row"><span class="result-key">연락처</span><input class="result-input" id="f-phone" type="tel" placeholder="010-0000-0000"></div>
+        <div class="result-row"><span class="result-key">연락처</span><input class="result-input" id="f-phone" type="tel" placeholder="010-0000-0000" oninput="autoFormatPhone(this)"></div>
         <div class="result-row"><span class="result-key">관심차종</span><input class="result-input" id="f-car"></div>
         <div class="result-row"><span class="result-key">컨택유형</span><input class="result-input" id="f-contact"></div>
+        <div class="result-row"><span class="result-key">거주지</span><input class="result-input" id="f-region" placeholder="예: 경기도 광주, 서울 강남"></div>
         <div class="result-row"><span class="result-key">주요관심사</span><input class="result-input" id="f-interest"></div>
         <div class="result-row"><span class="result-key">다음액션</span><input class="result-input" id="f-next"></div>
         <div class="result-row"><span class="result-key">메모</span><input class="result-input" id="f-memo"></div>
@@ -654,7 +655,8 @@ function jsonPrompt() {
   "contact":"컨택유형(방문/전화/문자/카카오/SNS/기타)",
   "interest":"주요 관심사 요약(1-2줄)",
   "next":"다음 액션(없으면 추후 연락)",
-  "memo":"거주지·특이사항 등(없으면 빈문자열)",
+  "region":"거주지(시/구/동 수준으로 추출, 없으면 빈문자열)",
+  "memo":"기타 메모(없으면 빈문자열)",
   "temperature": 0에서 100 사이 정수 또는 null,
   "tempLevel": "hot" 또는 "warm" 또는 "cold" 또는 null,
   "tempLabel": "온도 한 줄 요약 또는 빈문자열",
@@ -770,7 +772,7 @@ function fillResult(d) {
   const txt=(d.content||[]).map(i=>i.text||"").join("");
   if (!txt) throw new Error("AI 응답 없음");
   const p=JSON.parse(txt.replace(/```json|```/g,"").trim());
-  ["date","name","phone","car","contact","interest","next","memo"].forEach(k=>{
+  ["date","name","phone","car","contact","region","interest","next","memo"].forEach(k=>{
     const el=$("f-"+k); if(el) el.value=p[k]||"";
   });
   if (!p.date) $("f-date").value=today();
@@ -832,7 +834,9 @@ function showFullTempFromInline() {
 function fields() {
   return {
     date:$('f-date').value, name:$('f-name').value, phone:$('f-phone').value,
-    car:$('f-car').value, contact:$('f-contact').value, interest:$('f-interest').value,
+    car:$('f-car').value, contact:$('f-contact').value,
+    region:$('f-region') ? $('f-region').value : '',
+    interest:$('f-interest').value,
     next:$('f-next').value, memo:$('f-memo').value,
     temperature: null, tempLabel: '', tempLevel: '',
     savedAt:new Date().toLocaleString('ko-KR')
@@ -1170,7 +1174,7 @@ function deleteRecord(i, e) {
 
 function loadRecord(i) {
   const r=getRecords()[i];
-  ['date','name','phone','car','contact','interest','next','memo'].forEach(k=>{
+  ['date','name','phone','car','contact','region','interest','next','memo'].forEach(k=>{
     const el=$('f-'+k); if(el) el.value=r[k]||'';
   });
   $('resultSection').style.display='block';
@@ -1358,12 +1362,102 @@ function renderFollowup() {
 function quickFollowup(idx) {
   const r = getRecords()[idx];
   if (!r) return;
-  ['date','name','phone','car','contact','interest','next','memo'].forEach(k=>{
+  ['date','name','phone','car','contact','region','interest','next','memo'].forEach(k=>{
     const el=$('f-'+k); if(el) el.value=r[k]||'';
   });
   $('resultSection').style.display='block';
   switchTab('input');
   setTimeout(()=>showMessagePopup(), 300);
+}
+
+// ══════════════════════════════════════
+// 📅 날짜 / 📞 연락처 자동 포맷
+// ══════════════════════════════════════
+function autoFormatDate(input) {
+  let v = input.value.replace(/[^0-9]/g, '');
+  // 6자리: 260408 → 2026-04-08
+  if (v.length === 6) {
+    const yy = v.slice(0,2), mm = v.slice(2,4), dd = v.slice(4,6);
+    const formatted = '20' + yy + '-' + mm + '-' + dd;
+    // 유효한 날짜인지 확인
+    const d = new Date(formatted);
+    if (!isNaN(d)) {
+      input.value = formatted;
+      input.style.color = 'var(--green)';
+      setTimeout(() => { input.style.color = ''; }, 1000);
+    }
+  }
+  // 8자리: 20260408 → 2026-04-08
+  else if (v.length === 8) {
+    const yyyy = v.slice(0,4), mm = v.slice(4,6), dd = v.slice(6,8);
+    const formatted = yyyy + '-' + mm + '-' + dd;
+    const d = new Date(formatted);
+    if (!isNaN(d)) {
+      input.value = formatted;
+      input.style.color = 'var(--green)';
+      setTimeout(() => { input.style.color = ''; }, 1000);
+    }
+  }
+}
+
+function autoFormatPhone(input) {
+  let v = input.value.replace(/[^0-9]/g, '');
+  let formatted = '';
+  // 010/011/016/017/018/019 — 11자리
+  if (v.length === 11 && v.startsWith('0')) {
+    formatted = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7,11);
+  }
+  // 지역번호 10자리 (02-XXXX-XXXX)
+  else if (v.length === 10 && v.startsWith('02')) {
+    formatted = v.slice(0,2) + '-' + v.slice(2,6) + '-' + v.slice(6,10);
+  }
+  // 일반 지역번호 10자리 (0XX-XXX-XXXX)
+  else if (v.length === 10) {
+    formatted = v.slice(0,3) + '-' + v.slice(3,6) + '-' + v.slice(6,10);
+  }
+  if (formatted) {
+    input.value = formatted;
+    input.style.color = 'var(--green)';
+    setTimeout(() => { input.style.color = ''; }, 1000);
+  }
+}
+
+// ══════════════════════════════════════
+// 📅 날짜 / 📞 연락처 자동 포맷
+// ══════════════════════════════════════
+function autoFormatDate(input) {
+  let v = input.value.replace(/[^0-9]/g, '');
+  let formatted = '';
+  if (v.length === 6) {
+    formatted = '20' + v.slice(0,2) + '-' + v.slice(2,4) + '-' + v.slice(4,6);
+  } else if (v.length === 8) {
+    formatted = v.slice(0,4) + '-' + v.slice(4,6) + '-' + v.slice(6,8);
+  }
+  if (formatted) {
+    const d = new Date(formatted);
+    if (!isNaN(d)) {
+      input.value = formatted;
+      input.style.color = 'var(--green)';
+      setTimeout(() => { input.style.color = ''; }, 1000);
+    }
+  }
+}
+
+function autoFormatPhone(input) {
+  let v = input.value.replace(/[^0-9]/g, '');
+  let formatted = '';
+  if (v.length === 11 && v.startsWith('0')) {
+    formatted = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7,11);
+  } else if (v.length === 10 && v.startsWith('02')) {
+    formatted = v.slice(0,2) + '-' + v.slice(2,6) + '-' + v.slice(6,10);
+  } else if (v.length === 10) {
+    formatted = v.slice(0,3) + '-' + v.slice(3,6) + '-' + v.slice(6,10);
+  }
+  if (formatted) {
+    input.value = formatted;
+    input.style.color = 'var(--green)';
+    setTimeout(() => { input.style.color = ''; }, 1000);
+  }
 }
 
 updateConn();
@@ -1384,7 +1478,7 @@ function saveAppState() {
     tempInput:   document.getElementById('tempInput')   ? document.getElementById('tempInput').value   : '',
     resultVisible: document.getElementById('resultSection') ?
       document.getElementById('resultSection').style.display !== 'none' : false,
-    fields: ['date','name','phone','car','contact','interest','next','memo'].reduce((o,k) => {
+    fields: ['date','name','phone','car','contact','region','interest','next','memo'].reduce((o,k) => {
       const el = document.getElementById('f-'+k);
       if (el) o[k] = el.value;
       return o;
