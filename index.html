@@ -925,11 +925,24 @@ function renderHistory() {
   const el=$('historyList');
   if (!list.length){el.innerHTML='<div class="empty-state">저장된 기록이 없습니다</div>';return;}
   el.innerHTML=list.map((r,i)=>`
-    <div class="record-item" onclick="loadRecord(${i})">
-      <div class="record-top"><span class="record-name">${r.name||'미상'}</span><span class="record-car">${r.car||'미정'}</span></div>
-      <div class="record-meta">${r.date||''} · ${r.phone||''} · ${r.contact||'-'}</div>
-      <div class="record-next">→ ${r.next||'-'}</div>
+    <div class="record-item" style="position:relative;">
+      <div onclick="loadRecord(${i})" style="padding-right:40px;cursor:pointer;">
+        <div class="record-top"><span class="record-name">${r.name||'미상'}</span><span class="record-car">${r.car||'미정'}</span></div>
+        <div class="record-meta">${r.date||''} · ${r.phone||''} · ${r.contact||'-'}</div>
+        <div class="record-next">→ ${r.next||'-'}</div>
+      </div>
+      <button onclick="deleteRecord(${i},event)" style="position:absolute;top:50%;right:10px;transform:translateY(-50%);background:transparent;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:6px;line-height:1;">✕</button>
     </div>`).join('');
+}
+
+function deleteRecord(i, e) {
+  e.stopPropagation();
+  const list = getRecords();
+  const r = list[i];
+  if (!confirm('"' + (r.name||'미상') + '" 기록을 삭제할까요?')) return;
+  list.splice(i, 1);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  renderHistory();
 }
 
 function loadRecord(i) {
