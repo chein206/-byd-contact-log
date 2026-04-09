@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BYD 상담기록">
+<meta name="theme-color" content="#0a0a0a">
+<title>BYD 고객 상담 기록</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0a0a; --surface:#141414; --surface2:#1c1c1c;
+    --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.15);
+    --text:#f0f0f0; --text2:#888; --text3:#555;
+    --accent:#e8d5a3; --accent2:#c4a96b;
+    --red:#e05a5a; --green:#5aaa7a; --blue:#5a8ae0; --orange:#e8a03a;
+    --radius:14px; --radius-sm:8px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;}
+
+  /* ── 헤더 ── */
+  .header{position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:0.5px solid var(--border);padding:14px 20px 12px;display:flex;align-items:center;justify-content:space-between;}
+  .logo-badge{background:var(--accent);color:#1a1200;font-size:11px;font-weight:700;letter-spacing:0.08em;padding:3px 8px;border-radius:4px;}
+  .header-title{font-size:15px;font-weight:500;margin-left:10px;}
+  .header-left{display:flex;align-items:center;}
+  .conn-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);}
+  .conn-dot.on{background:var(--green);box-shadow:0 0 5px rgba(90,170,122,0.5);}
+  .conn-label{font-size:11px;color:var(--text3);margin-left:5px;}
+
+  /* ── 탭 ── */
+  .tabs{display:flex;background:var(--surface);border-bottom:0.5px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{flex:1;min-width:0;padding:12px 6px;text-align:center;font-size:13px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500;}
+
+  /* ── 페이지 ── */
+  .page{display:none;padding:16px;padding-bottom:60px;}
+  .page.active{display:block;}
+
+  /* ── 카드 ── */
+  .card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
+  .card-label{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px;}
+
+  /* ── 입력 모드 탭 ── */
+  .mode-tabs{display:flex;gap:6px;margin-bottom:12px;}
+  .mode-btn{flex:1;padding:10px 4px;border-radius:var(--radius-sm);background:var(--surface);border:0.5px solid var(--border);color:var(--text3);font-family:'Noto Sans KR',sans-serif;font-size:12px;cursor:pointer;transition:all 0.15s;text-align:center;}
+  .mode-btn.active{background:var(--surface2);border-color:var(--accent2);color:var(--accent);font-weight:500;}
+
+  /* ── 폼 요소 ── */
+  textarea,input[type=text],input[type=url],input[type=tel]{width:100%;background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;padding:12px;outline:none;transition:border-color 0.2s;-webkit-appearance:none;}
+  textarea:focus,input:focus{border-color:var(--accent2);}
+  textarea{min-height:100px;resize:none;line-height:1.7;}
+  input[type=text],input[type=url],input[type=tel]{height:44px;}
+  ::placeholder{color:var(--text3);}
+  select{width:100%;height:44px;background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;padding:0 12px;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+
+  /* ── 결과 그리드 ── */
+  .result-grid{display:flex;flex-direction:column;}
+  .result-row{display:flex;align-items:center;padding:9px 0;border-bottom:0.5px solid var(--border);gap:10px;}
+  .result-row:last-child{border-bottom:none;}
+  .result-key{font-size:11px;color:var(--text3);min-width:68px;font-family:'DM Mono',monospace;}
+  .result-input{flex:1;background:transparent;border:none;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;outline:none;border-bottom:0.5px solid transparent;padding-bottom:1px;transition:border-color 0.2s;}
+  .result-input:focus{border-bottom-color:var(--accent2);}
+  .result-select{flex:1;background:transparent;border:none;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer;}
+  .result-select option{background:var(--surface2);}
+
+  /* ── 출고의지 버튼 그룹 ── */
+  .will-group{display:flex;gap:5px;flex-wrap:wrap;}
+  .will-btn{flex:1;min-width:calc(20% - 4px);padding:8px 4px;border-radius:6px;background:var(--surface2);border:0.5px solid var(--border);color:var(--text3);font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:500;cursor:pointer;text-align:center;transition:all 0.15s;}
+  .will-btn.active-0{background:rgba(90,138,224,0.15);border-color:rgba(90,138,224,0.4);color:#5a8ae0;}
+  .will-btn.active-30{background:rgba(232,160,58,0.1);border-color:rgba(232,160,58,0.3);color:#e8a03a;}
+  .will-btn.active-50{background:rgba(232,160,58,0.15);border-color:rgba(232,160,58,0.4);color:#e8a03a;}
+  .will-btn.active-80{background:rgba(90,170,122,0.15);border-color:rgba(90,170,122,0.4);color:#5aaa7a;}
+  .will-btn.active-100{background:rgba(232,213,163,0.15);border-color:rgba(232,213,163,0.4);color:#e8d5a3;}
+
+  /* ── 상태 버튼 그룹 ── */
+  .status-group{display:flex;gap:5px;flex-wrap:wrap;}
+  .status-btn{flex:1;min-width:calc(33% - 4px);padding:8px 4px;border-radius:6px;background:var(--surface2);border:0.5px solid var(--border);color:var(--text3);font-family:'Noto Sans KR',sans-serif;font-size:11px;font-weight:500;cursor:pointer;text-align:center;transition:all 0.15s;}
+  .status-btn.sel-신규{background:rgba(90,138,224,0.15);border-color:rgba(90,138,224,0.4);color:#5a8ae0;}
+  .status-btn.sel-진행중{background:rgba(232,160,58,0.15);border-color:rgba(232,160,58,0.4);color:#e8a03a;}
+  .status-btn.sel-계약{background:rgba(90,170,122,0.15);border-color:rgba(90,170,122,0.4);color:#5aaa7a;}
+  .status-btn.sel-출고완료{background:rgba(232,213,163,0.15);border-color:rgba(232,213,163,0.4);color:#e8d5a3;}
+  .status-btn.sel-이탈{background:rgba(224,90,90,0.12);border-color:rgba(224,90,90,0.3);color:#e05a5a;}
+
+  /* ── 버튼 ── */
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:48px;border-radius:var(--radius-sm);font-family:'Noto Sans KR',sans-serif;font-size:15px;font-weight:500;cursor:pointer;border:none;transition:all 0.15s;}
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--accent);color:#1a1200;}
+  .btn-primary:hover{background:#f0df9a;}
+  .btn-primary:disabled{background:#3a3020;color:#6a5a30;cursor:not-allowed;transform:none;}
+  .btn-outline{background:transparent;color:var(--text);border:0.5px solid var(--border2);}
+  .btn-outline:hover{background:var(--surface2);}
+  .btn-save{background:#1a2a1a;color:var(--green);border:0.5px solid rgba(90,170,122,0.3);}
+  .btn-sm{height:38px;font-size:13px;}
+
+  /* ── 사진 ── */
+  .photo-drop{border:1.5px dashed var(--border2);border-radius:var(--radius-sm);padding:28px 16px;text-align:center;cursor:pointer;transition:all 0.15s;}
+  .photo-drop:active{background:var(--surface2);}
+  #previewImg{width:100%;border-radius:var(--radius-sm);border:0.5px solid var(--border);display:block;}
+  #fuPreviewImg{width:100%;border-radius:var(--radius-sm);border:0.5px solid var(--border);display:block;}
+  .clear-photo{background:transparent;border:none;color:var(--text3);font-size:12px;cursor:pointer;margin-top:8px;display:block;}
+
+  /* ── 배지/뱃지 ── */
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border-radius:20px;margin-top:8px;}
+  .badge-ok{background:rgba(90,170,122,0.15);color:var(--green);}
+  .badge-err{background:rgba(224,90,90,0.15);color:var(--red);}
+  .badge-info{background:rgba(90,138,224,0.15);color:var(--blue);}
+  .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+  /* ── 스피너 ── */
+  .spinner{width:15px;height:15px;border-radius:50%;border:2px solid rgba(26,18,0,0.2);border-top-color:#1a1200;animation:spin 0.7s linear infinite;display:inline-block;}
+  .spinner-light{border:2px solid var(--border);border-top-color:var(--accent);}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ── 고객 목록 ── */
+  .record-item{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;}
+  .record-item:active{border-color:var(--border2);}
+  .record-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+  .record-name{font-size:15px;font-weight:500;}
+  .record-car{font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(232,213,163,0.12);color:var(--accent);font-family:'DM Mono',monospace;}
+  .record-meta{font-size:12px;color:var(--text3);}
+  .record-next{font-size:12px;color:var(--text2);margin-top:3px;}
+
+  /* ── 팔로업 ── */
+  .followup-item{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;}
+  .followup-days{font-size:11px;font-family:'DM Mono',monospace;min-width:36px;text-align:center;padding:4px 6px;border-radius:6px;font-weight:600;}
+  .followup-days.urgent{background:rgba(224,90,90,0.15);color:#e05a5a;}
+  .followup-days.soon{background:rgba(232,160,58,0.15);color:#e8a03a;}
+  .followup-days.ok{background:rgba(90,170,122,0.15);color:#5aaa7a;}
+
+  /* ── 출고의지 뱃지 ── */
+  .will-badge{display:inline-flex;align-items:center;font-size:11px;padding:2px 8px;border-radius:10px;font-family:'DM Mono',monospace;}
+  .will-0{background:rgba(90,138,224,0.12);color:#5a8ae0;}
+  .will-30{background:rgba(232,160,58,0.12);color:#e8a03a;}
+  .will-50{background:rgba(232,160,58,0.18);color:#e8a03a;}
+  .will-80{background:rgba(90,170,122,0.15);color:#5aaa7a;}
+  .will-100{background:rgba(232,213,163,0.15);color:#e8d5a3;}
+
+  /* ── 상태 뱃지 ── */
+  .status-badge{display:inline-flex;align-items:center;font-size:11px;padding:2px 8px;border-radius:10px;}
+  .st-신규{background:rgba(90,138,224,0.12);color:#5a8ae0;}
+  .st-진행중{background:rgba(232,160,58,0.15);color:#e8a03a;}
+  .st-계약{background:rgba(90,170,122,0.15);color:#5aaa7a;}
+  .st-출고완료{background:rgba(232,213,163,0.15);color:#e8d5a3;}
+  .st-이탈{background:rgba(224,90,90,0.12);color:#e05a5a;}
+
+  /* ── 설정 ── */
+  .setting-label{font-size:13px;color:var(--text2);margin-bottom:6px;}
+  .setting-desc{font-size:11px;color:var(--text3);margin-top:5px;line-height:1.6;}
+  .setting-row{margin-bottom:14px;}
+  .hint{font-size:12px;color:var(--text3);margin-top:6px;line-height:1.6;}
+  .count-pill{display:inline-block;font-size:11px;background:var(--surface2);color:var(--text3);padding:1px 7px;border-radius:10px;font-family:'DM Mono',monospace;border:0.5px solid var(--border);}
+  .info-box{background:rgba(232,213,163,0.06);border:0.5px solid rgba(232,213,163,0.2);border-radius:var(--radius-sm);padding:12px;font-size:12px;color:var(--text2);line-height:1.8;}
+  .empty-state{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px;line-height:2;}
+
+  /* ── 검색 ── */
+  .search-wrap{position:relative;margin-bottom:12px;}
+  .search-input{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;padding:10px 12px 10px 36px;width:100%;outline:none;height:40px;}
+  .search-input:focus{border-color:var(--accent2);}
+  .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none;}
+
+  /* ── 팔로업 필터 ── */
+  .filter-row{display:flex;gap:6px;margin-bottom:14px;}
+  .filter-btn{flex:1;padding:8px 4px;border-radius:var(--radius-sm);background:var(--surface);border:0.5px solid var(--border);color:var(--text3);font-family:'Noto Sans KR',sans-serif;font-size:12px;cursor:pointer;transition:all 0.15s;text-align:center;}
+  .filter-btn.active{background:var(--surface2);border-color:var(--accent2);color:var(--accent);font-weight:500;}
+
+  /* ── 히스토리 블록 ── */
+  .history-block{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-top:8px;}
+  .history-date{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:4px;}
+  .history-text{font-size:13px;color:var(--text2);line-height:1.7;}
+
+  /* ── 구분선 ── */
+  .divider{height:0.5px;background:var(--border);margin:14px 0;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <span class="logo-badge">BYD</span>
+    <span class="header-title">고객 상담 기록</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px;">
+    <div class="conn-dot" id="connDot"></div>
+    <span class="conn-label" id="connLabel">미연결</span>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('input')">✦ 새기록</div>
+  <div class="tab" onclick="switchTab('followup')">📋 팔로업</div>
+  <div class="tab" onclick="switchTab('history')">고객목록</div>
+  <div class="tab" onclick="switchTab('settings')">설정</div>
+</div>
+
+<!-- ════════════════════════════════════
+     새기록 탭
+════════════════════════════════════ -->
+<div class="page active" id="tab-input">
+
+  <div class="mode-tabs">
+    <button class="mode-btn active" id="modeText"    onclick="switchMode('text')">✏️ 텍스트</button>
+    <button class="mode-btn"        id="modePhoto"   onclick="switchMode('photo')">📷 카메라</button>
+    <button class="mode-btn"        id="modeGallery" onclick="switchMode('gallery')">🖼️ 갤러리</button>
+  </div>
+
+  <!-- 텍스트 입력 -->
+  <div class="card" id="textCard">
+    <div class="card-label">상담 내용 입력</div>
+    <textarea id="rawInput" placeholder="예: 홍길동 고객, 010-1234-5678, 카카오로 연락. 씰 시승 문의. 경기도 거주. 이번주 일요일 10시 방문 예정&#10;&#10;자유롭게 입력하세요 →"></textarea>
+    <div class="hint">AI가 연락처 / 고객명 / 차종 / 컨택유형 / 다음액션으로 자동 분류합니다</div>
+    <div style="margin-top:10px;">
+      <button class="btn btn-primary" id="analyzeBtn" onclick="analyzeText()">
+        <span id="btnContent">✦ &nbsp;AI로 자동 정리</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 사진 입력 -->
+  <div class="card" id="photoCard" style="display:none;">
+    <div class="card-label" id="photoCardLabel">고객 카드 / 대화 캡처</div>
+    <input type="file" id="cameraInput"      accept="image/*" capture="environment" style="display:none;" onchange="handlePhoto(this)">
+    <input type="file" id="galleryFileInput" accept="image/*"                       style="display:none;" onchange="handlePhoto(this)">
+    <div id="photoPreview" style="display:none;margin-bottom:12px;">
+      <img id="previewImg">
+      <button class="clear-photo" onclick="clearPhoto()">✕ 사진 제거</button>
+    </div>
+    <div id="photoPlaceholder">
+      <div class="photo-drop" onclick="triggerPhoto()">
+        <div style="font-size:36px;margin-bottom:8px;" id="photoIcon">📷</div>
+        <div style="font-size:14px;font-weight:500;margin-bottom:4px;" id="photoTitle">탭하여 촬영</div>
+        <div style="font-size:12px;color:var(--text3);">명함 · 고객카드 · 카카오 대화 캡처 모두 인식</div>
+      </div>
+    </div>
+    <div class="hint" style="margin-top:10px;">카카오 대화 캡처 시 → 왼쪽(고객) 메시지에서 정보 추출</div>
+    <div style="margin-top:10px;">
+      <button class="btn btn-primary" id="analyzePhotoBtn" onclick="analyzePhoto()" disabled>
+        <span id="btnPhotoContent">사진을 먼저 선택해주세요</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 결과 섹션 -->
+  <div id="resultSection" style="display:none;">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="card-label" style="margin:0;">정리된 내용</div>
+        <span style="font-size:11px;color:var(--text3);">수정 가능</span>
+      </div>
+      <div class="result-grid">
+        <div class="result-row"><span class="result-key">날짜</span><input class="result-input" id="f-date" placeholder="260408" oninput="autoFormatDate(this)"></div>
+        <div class="result-row"><span class="result-key">고객명</span><input class="result-input" id="f-name"></div>
+        <div class="result-row"><span class="result-key">연락처</span><input class="result-input" id="f-phone" type="tel" placeholder="010-0000-0000" oninput="autoFormatPhone(this)"></div>
+        <div class="result-row"><span class="result-key">관심차종</span><input class="result-input" id="f-car"></div>
+        <div class="result-row"><span class="result-key">컨택유형</span><input class="result-input" id="f-contact"></div>
+        <div class="result-row"><span class="result-key">거주지</span><input class="result-input" id="f-region" placeholder="예: 경기도 광주, 서울 강남"></div>
+        <div class="result-row"><span class="result-key">다음액션</span><input class="result-input" id="f-next"></div>
+        <div class="result-row"><span class="result-key">메모</span><input class="result-input" id="f-memo"></div>
+        <div class="result-row"><span class="result-key">견적내용</span><input class="result-input" id="f-quote" placeholder="견적기 자동입력 또는 직접 입력"></div>
+      </div>
+    </div>
+
+    <!-- 출고 의지 -->
+    <div class="card">
+      <div class="card-label">출고 의지</div>
+      <div class="will-group" id="willGroup">
+        <button class="will-btn" data-v="0"   onclick="selectWill(0)">0%</button>
+        <button class="will-btn" data-v="30"  onclick="selectWill(30)">30%</button>
+        <button class="will-btn" data-v="50"  onclick="selectWill(50)">50%</button>
+        <button class="will-btn" data-v="80"  onclick="selectWill(80)">80%</button>
+        <button class="will-btn" data-v="100" onclick="selectWill(100)">100%</button>
+      </div>
+    </div>
+
+    <!-- 고객 상태 -->
+    <div class="card">
+      <div class="card-label">고객 상태</div>
+      <div class="status-group" id="statusGroup">
+        <button class="status-btn" data-v="신규"   onclick="selectStatus('신규')">신규</button>
+        <button class="status-btn" data-v="진행중" onclick="selectStatus('진행중')">진행중</button>
+        <button class="status-btn" data-v="계약"   onclick="selectStatus('계약')">계약</button>
+        <button class="status-btn" data-v="출고완료" onclick="selectStatus('출고완료')">출고완료</button>
+        <button class="status-btn" data-v="이탈"   onclick="selectStatus('이탈')">이탈</button>
+      </div>
+    </div>
+
+    <button class="btn btn-save" id="saveBtn" onclick="saveRecord()" style="margin-bottom:8px;">
+      <span id="saveBtnContent">💾 &nbsp;저장 (시트 + 노션 + 로컬)</span>
+    </button>
+    <button class="btn btn-outline" onclick="saveContact()" style="margin-bottom:8px;font-size:14px;">
+      📱 연락처 저장
+    </button>
+    <button class="btn btn-outline" onclick="showMessagePopup()" style="margin-bottom:8px;font-size:14px;color:#e8d5a3;border-color:rgba(232,213,163,0.3);">
+      💬 상담 후 메시지 발송
+    </button>
+    <div id="saveStatus" style="min-height:28px;"></div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════
+     팔로업 탭
+════════════════════════════════════ -->
+<div class="page" id="tab-followup">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+    <span style="font-size:14px;font-weight:500;">팔로업 관리</span>
+    <button onclick="renderFollowup()" style="background:transparent;border:none;color:var(--text3);font-size:13px;cursor:pointer;">↺ 새로고침</button>
+  </div>
+  <div style="font-size:12px;color:var(--text3);margin-bottom:14px;">마지막 상담 기준 경과일 · 탭하여 팔로업 입력</div>
+
+  <div class="filter-row" id="followupFilterRow">
+    <button class="filter-btn active" id="ff-all"    onclick="setFollowupFilter('all')">전체</button>
+    <button class="filter-btn"        id="ff-urgent" onclick="setFollowupFilter('urgent')">🔴 7일+</button>
+    <button class="filter-btn"        id="ff-soon"   onclick="setFollowupFilter('soon')">🟡 3~6일</button>
+    <button class="filter-btn"        id="ff-ok"     onclick="setFollowupFilter('ok')">🟢 ~2일</button>
+  </div>
+
+  <div id="followupList"></div>
+</div>
+
+<!-- ════════════════════════════════════
+     고객목록 탭
+════════════════════════════════════ -->
+<div class="page" id="tab-history">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <span style="font-size:14px;font-weight:500;">저장된 고객</span>
+    <span class="count-pill" id="totalCount">0건</span>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="searchInput" placeholder="이름, 연락처, 차종 검색..." oninput="renderHistory()">
+  </div>
+  <div id="historyList"></div>
+</div>
+
+<!-- ════════════════════════════════════
+     설정 탭
+════════════════════════════════════ -->
+<div class="page" id="tab-settings">
+  <div class="card">
+    <div class="card-label">저장 연동</div>
+    <div class="setting-row">
+      <div class="setting-label">Apps Script 웹훅 URL</div>
+      <input type="url" id="webhookUrl" placeholder="https://script.google.com/macros/s/..." oninput="saveSettings()">
+      <div class="setting-desc">이 웹훅 하나로 구글 시트 + 노션에 동시 저장됩니다</div>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="testWebhook()">연결 테스트</button>
+    <div id="webhookTestStatus"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Claude API</div>
+    <div class="setting-row">
+      <div class="setting-label">API 키</div>
+      <input type="text" id="apiKey" placeholder="sk-ant-..." oninput="saveSettings()">
+      <div class="setting-desc">Anthropic Console에서 발급. 기기에만 저장됩니다.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">차종 블로그 URL</div>
+    <div class="setting-desc" style="margin-bottom:12px;">상담 후 메시지 발송 시 첨부할 차종별 블로그 링크</div>
+    <div class="setting-row"><div class="setting-label">🐬 돌핀</div><input type="url" id="url-dolphin" placeholder="https://blog.naver.com/..." oninput="saveUrlSettings()"></div>
+    <div class="setting-row"><div class="setting-label">🚗 아토3</div><input type="url" id="url-atto3"   placeholder="https://blog.naver.com/..." oninput="saveUrlSettings()"></div>
+    <div class="setting-row"><div class="setting-label">⚡ 씰</div><input type="url" id="url-seal"     placeholder="https://blog.naver.com/..." oninput="saveUrlSettings()"></div>
+    <div class="setting-row"><div class="setting-label">🦁 씨라이언7</div><input type="url" id="url-sealion7" placeholder="https://blog.naver.com/..." oninput="saveUrlSettings()"></div>
+    <div class="setting-row" style="margin-bottom:0;"><div class="setting-label">🔋 LFP 배터리</div><input type="url" id="url-lfp" placeholder="https://blog.naver.com/..." oninput="saveUrlSettings()"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">노션 동기화</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.7;">노션 DB의 고객 데이터를 앱으로 불러옵니다.<br>기존 로컬 데이터는 노션 데이터로 덮어씁니다.</div>
+    <button class="btn btn-outline btn-sm" id="syncBtn" onclick="syncFromNotion()" style="color:var(--accent);border-color:rgba(232,213,163,0.3);margin-bottom:8px;">
+      <span id="syncBtnContent">☁️ &nbsp;노션에서 DB 불러오기</span>
+    </button>
+    <div id="syncStatus" style="min-height:24px;"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">저장 현황</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <span style="font-size:14px;">로컬 기록</span>
+      <span class="count-pill" id="settingsCount">0건</span>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="clearAll()" style="color:var(--red);border-color:rgba(224,90,90,0.3);">전체 기록 삭제</button>
+  </div>
+
+  <div class="card" style="border-color:rgba(232,213,163,0.2);">
+    <div class="card-label">저장 흐름</div>
+    <div class="info-box">
+      앱에서 저장 버튼<br>
+      → Apps Script 웹훅 (1개 URL)<br>
+      → 구글 시트 자동 저장 ✓<br>
+      → 노션 BYD 고객 관리 DB 자동 저장 ✓<br>
+      → 기기 로컬 저장 ✓
+    </div>
+  </div>
+
+  <div class="card" style="border-color:rgba(232,213,163,0.2);">
+    <div class="card-label">홈화면 추가</div>
+    <div style="font-size:13px;color:var(--text2);line-height:2.2;">
+      ① 크롬에서 이 페이지 열기<br>
+      ② 우측 상단 메뉴 (⋮) 탭<br>
+      ③ <strong style="color:var(--accent);">"홈 화면에 추가"</strong> 선택
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'byd_v5';
+let currentMode = 'text';
+let imgBase64 = null, imgType = 'image/jpeg';
+let fuImgBase64 = null, fuImgType = 'image/jpeg';
+let selectedWill = null;
+let selectedStatus = '신규';
+let followupFilter = 'all';
+
+const $ = id => document.getElementById(id);
+
+// ── 유틸 ──
+function today() {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+}
+
+function cfg() {
+  return {
+    webhook: localStorage.getItem('byd_webhook')||'',
+    apiKey:  localStorage.getItem('byd_apikey')||''
+  };
+}
+
+function saveSettings() {
+  localStorage.setItem('byd_webhook', $('webhookUrl').value.trim());
+  localStorage.setItem('byd_apikey',  $('apiKey').value.trim());
+  updateConn();
+}
+
+function updateConn() {
+  const ok = !!cfg().webhook;
+  $('connDot').classList.toggle('on', ok);
+  $('connLabel').textContent = ok ? '시트+노션 연결됨' : '미연결';
+  $('connLabel').style.color = ok ? '#5aaa7a' : '';
+}
+
+// ── 탭 전환 ──
+function switchTab(tab) {
+  const tabs = ['input','followup','history','settings'];
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', tabs[i]===tab));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  $('tab-'+tab).classList.add('active');
+  if (tab==='history')  renderHistory();
+  if (tab==='settings') renderSettings();
+  if (tab==='followup') renderFollowup();
+}
+
+// ── 입력 모드 전환 ──
+function switchMode(m) {
+  currentMode = m;
+  ['text','photo','gallery'].forEach(k => {
+    const el = $('mode'+k.charAt(0).toUpperCase()+k.slice(1));
+    if (el) el.classList.toggle('active', k===m);
+  });
+  $('textCard').style.display  = m==='text' ? 'block':'none';
+  $('photoCard').style.display = (m==='photo'||m==='gallery') ? 'block':'none';
+  if (m==='photo') {
+    $('photoCardLabel').textContent='고객 카드 / 대화 캡처 촬영';
+    $('photoIcon').textContent='📷'; $('photoTitle').textContent='탭하여 촬영';
+  } else if (m==='gallery') {
+    $('photoCardLabel').textContent='갤러리에서 선택';
+    $('photoIcon').textContent='🖼️'; $('photoTitle').textContent='탭하여 사진 선택';
+  }
+}
+
+// ── 출고 의지 선택 ──
+function selectWill(v) {
+  selectedWill = v;
+  document.querySelectorAll('.will-btn').forEach(btn => {
+    btn.className = 'will-btn';
+    if (parseInt(btn.dataset.v) === v) btn.classList.add('active-'+v);
+  });
+}
+
+// ── 고객 상태 선택 ──
+function selectStatus(v) {
+  selectedStatus = v;
+  document.querySelectorAll('.status-btn').forEach(btn => {
+    btn.className = 'status-btn';
+    if (btn.dataset.v === v) btn.classList.add('sel-'+v);
+  });
+}
+
+// ── 기본값 초기화 ──
+function resetWillStatus() {
+  selectedWill = null;
+  selectedStatus = '신규';
+  document.querySelectorAll('.will-btn').forEach(b => b.className='will-btn');
+  selectStatus('신규');
+}
+
+// ── 사진 ──
+function triggerPhoto() {
+  currentMode==='photo' ? $('cameraInput').click() : $('galleryFileInput').click();
+}
+function handlePhoto(input) {
+  const file=input.files[0]; if (!file) return;
+  imgType=file.type||'image/jpeg';
+  const r=new FileReader();
+  r.onload=e=>{
+    imgBase64=e.target.result.split(',')[1];
+    $('previewImg').src=e.target.result;
+    $('photoPreview').style.display='block';
+    $('photoPlaceholder').style.display='none';
+    $('analyzePhotoBtn').disabled=false;
+    $('btnPhotoContent').innerHTML='✦ &nbsp;사진 분석하기';
+  };
+  r.readAsDataURL(file); input.value='';
+}
+function clearPhoto() {
+  imgBase64=null;
+  $('photoPreview').style.display='none';
+  $('photoPlaceholder').style.display='block';
+  $('analyzePhotoBtn').disabled=true;
+  $('btnPhotoContent').textContent='사진을 먼저 선택해주세요';
+}
+
+// ── Claude API ──
+async function claude(messages) {
+  const {apiKey}=cfg();
+  if (!apiKey) { alert('설정 탭에서 API 키를 먼저 입력해주세요.'); return null; }
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages})
+  });
+  const d=await res.json();
+  if (d.error) throw new Error(`API 오류 [${d.error.type}]: ${d.error.message}`);
+  return d;
+}
+
+function jsonPrompt() {
+  return `반드시 JSON만 출력 (마크다운·설명 없이):
+{
+  "date":"날짜(YYYY-MM-DD, 없으면 ${today()})",
+  "name":"고객명(없으면 미상)",
+  "phone":"연락처(010-XXXX-XXXX, 없으면 빈문자열)",
+  "car":"관심차종(차종 매핑 적용, 없으면 미정)",
+  "contact":"컨택유형(방문/전화/문자/카카오/SNS/기타)",
+  "next":"다음 액션(없으면 추후 연락)",
+  "region":"거주지(시/구/동 수준으로 추출, 없으면 빈문자열)",
+  "memo":"상담 내용 요약 + 주요 관심사(시승/가격/충전/보조금 등) 포함 (없으면 빈문자열)"
+}
+
+[차종 매핑]
+씨라7/씨라이언7/sealion7/SL7/씰라이언 → 씨라이언7
+씰후/씰rwd/seal rwd/RWD → 씰RWD
+씰사/씰awd/seal awd/AWD → 씰AWD
+씰/seal → 씰
+돌핀A/돌핀액티브/dolphin active → 돌핀Active
+돌핀/dolphin → 돌핀
+아토/아토3/atto/atto3 → 아토3
+한/han → 한`;
+}
+
+// ── 텍스트 분석 ──
+async function analyzeText() {
+  const raw=$('rawInput').value.trim();
+  if (!raw) { alert('상담 내용을 입력해주세요'); return; }
+  const btn=$('analyzeBtn'); btn.disabled=true;
+  $('btnContent').innerHTML='<span class="spinner spinner-light"></span>&nbsp; AI 분석 중...';
+  try {
+    const prompt = [
+      '당신은 BYD 전기차 전문 영업 어시스턴트입니다. 아래 고객 상담 내용에서 정보를 추출해주세요.',
+      '',
+      '[정보 추출 규칙]',
+      '1. 고객명: 고객이 직접 이름을 말한 경우만 추출',
+      '2. 연락처: 010-XXXX-XXXX 형식 추출',
+      '3. 관심차종: 언급된 BYD 차종 (차종 매핑 적용)',
+      '4. 컨택유형: 카카오/문자/전화/방문/SNS 중 해당',
+      '5. 다음액션: 합의된 약속을 구체적으로 추출',
+      '6. 메모: 주요 관심사(시승/가격/충전/보조금 등) + 거주지 + 특이사항 모두 포함',
+      '',
+      '입력 내용:',
+      JSON.stringify(raw),
+      '',
+      jsonPrompt()
+    ].join('\n');
+    const d=await claude([{role:'user',content:prompt}]);
+    if (d) fillResult(d);
+  } catch(e){alert('분석 실패: '+e.message);}
+  finally{btn.disabled=false;$('btnContent').innerHTML='✦ &nbsp;AI로 자동 정리';}
+}
+
+// ── 사진 분석 ──
+async function analyzePhoto() {
+  if (!imgBase64){alert('사진을 먼저 선택해주세요');return;}
+  const btn=$('analyzePhotoBtn'); btn.disabled=true;
+  $('btnPhotoContent').innerHTML='<span class="spinner spinner-light"></span>&nbsp; 사진 분석 중...';
+  const photoPromptText = [
+    '당신은 BYD 전기차 전문 영업 어시스턴트입니다.',
+    '이 이미지에서 고객 정보를 빠짐없이 추출해주세요.',
+    '이미지는 카카오톡/문자 대화 캡처, 스마트폰 연락처 화면, 또는 고객 정보 카드일 수 있습니다.',
+    '',
+    '=== 이미지 유형별 처리 ===',
+    '',
+    '[A. 스마트폰 연락처 화면인 경우]',
+    '1. 연락처명 파싱 규칙 (예: \'260320 홍병국 고객님 아토3 돌핀A ㄷㄷㅁ ㄴㅂ\')',
+    '   - 맨 앞 6자리 숫자 = 날짜 (YYMMDD → YYYY-MM-DD 변환)',
+    '   - 그 다음 한글 이름 = 고객명 (고객님 제외)',
+    '   - 차종명 = 관심차종',
+    '   - 한글 자음 약어: ㄷㄷㅁ=동대문전시장, ㅅㅊ=서초전시장, ㄴㅂ=내방, ㅈㅎ=전화컨택',
+    '2. 전화번호: 화면 하단 휴대전화 번호 추출',
+    '3. 메모란: 전체 텍스트를 memo 필드에 입력',
+    '',
+    '[B. 카카오톡/문자 대화 캡처인 경우]',
+    '- 왼쪽 말풍선 = 고객 메시지 → 분석 대상',
+    '- 오른쪽 말풍선 = 영업사원(나) 메시지 → 맥락 파악용',
+    '',
+    '[C. 명함/고객카드인 경우]',
+    '- 모든 텍스트 정보 추출',
+    '',
+    jsonPrompt()
+  ].join('\n');
+  try {
+    const d=await claude([{role:'user',content:[
+      {type:'image',source:{type:'base64',media_type:imgType,data:imgBase64}},
+      {type:'text',text:photoPromptText}
+    ]}]);
+    if (d) fillResult(d);
+  } catch(e){alert('분석 실패: '+e.message);}
+  finally{btn.disabled=false;$('btnPhotoContent').innerHTML='✦ &nbsp;사진 분석하기';}
+}
+
+function fillResult(d) {
+  const txt=(d.content||[]).map(i=>i.text||'').join('');
+  if (!txt) throw new Error('AI 응답 없음');
+  const p=JSON.parse(txt.replace(/```json|```/g,'').trim());
+  ['date','name','phone','car','contact','region','next','memo'].forEach(k=>{
+    const el=$('f-'+k); if(el) el.value=p[k]||'';
+  });
+  if (!p.date) $('f-date').value=today();
+  // quote는 AI가 추출하지 않으므로 건드리지 않음
+  resetWillStatus();
+  $('resultSection').style.display='block';
+  $('saveStatus').innerHTML='';
+  $('resultSection').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function fields() {
+  return {
+    date:     $('f-date').value,
+    name:     $('f-name').value,
+    phone:    $('f-phone').value,
+    car:      $('f-car').value,
+    contact:  $('f-contact').value,
+    region:   $('f-region') ? $('f-region').value : '',
+    next:     $('f-next').value,
+    memo:     $('f-memo').value,
+    quote:    $('f-quote') ? $('f-quote').value : '',
+    will:     selectedWill,
+    status:   selectedStatus || '신규',
+    savedAt:  new Date().toLocaleString('ko-KR'),
+    followups: []
+  };
+}
+
+// ── 저장 ──
+async function saveRecord() {
+  const record=fields();
+  const btn=$('saveBtn'); btn.disabled=true;
+  $('saveBtnContent').innerHTML='<span class="spinner spinner-light"></span>&nbsp; 저장 중...';
+
+  // 로컬
+  const list=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+  list.unshift(record); if(list.length>300) list.pop();
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(list));
+
+  // 웹훅
+  const {webhook}=cfg();
+  let msg='로컬 ✓';
+  if (webhook) {
+    try {
+      await fetch(webhook,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(record)});
+      msg='로컬 ✓ · 시트 ✓ · 노션 ✓';
+    } catch(e){ msg='로컬 ✓ · 전송 실패'; }
+  } else { msg='로컬 ✓ · 웹훅 미설정'; }
+
+  const ok=msg.includes('로컬 ✓');
+  $('saveStatus').innerHTML=`<span class="badge ${ok?'badge-ok':'badge-info'}"><span class="dot"></span>${msg}</span>`;
+
+  if (ok) {
+    setTimeout(()=>{
+      $('rawInput').value='';
+      clearPhoto();
+      $('resultSection').style.display='none';
+      $('saveStatus').innerHTML='';
+      resetWillStatus();
+    },2200);
+  }
+  btn.disabled=false;
+  $('saveBtnContent').textContent='💾 저장 (시트 + 노션 + 로컬)';
+}
+
+// ── URL 설정 ──
+function saveUrlSettings() {
+  ['dolphin','atto3','seal','sealion7','lfp'].forEach(k => {
+    const el = $('url-'+k);
+    if (el) localStorage.setItem('byd_url_'+k, el.value.trim());
+  });
+}
+function loadUrlSettings() {
+  ['dolphin','atto3','seal','sealion7','lfp'].forEach(k => {
+    const el = $('url-'+k);
+    if (el) el.value = localStorage.getItem('byd_url_'+k) || '';
+  });
+}
+function getCarUrl(car) {
+  const c=(car||'').toLowerCase();
+  if (c.includes('돌핀')||c.includes('dolphin')) return localStorage.getItem('byd_url_dolphin')||'';
+  if (c.includes('아토')||c.includes('atto'))    return localStorage.getItem('byd_url_atto3')||'';
+  if (c.includes('씨라')||c.includes('sealion')) return localStorage.getItem('byd_url_sealion7')||'';
+  if (c.includes('씰')||c.includes('seal'))      return localStorage.getItem('byd_url_seal')||'';
+  return '';
+}
+
+// ── 메시지 팝업 ──
+function showMessagePopup(nameOverride, carOverride) {
+  const name   = nameOverride || $('f-name').value.trim() || '고객';
+  const car    = carOverride  || $('f-car').value.trim() || '';
+  const date   = ($('f-date').value||today()).replace(/-/g,'').slice(2);
+  const carUrl = getCarUrl(car);
+  const lfpUrl = localStorage.getItem('byd_url_lfp')||'';
+
+  const existing = $('msgPopup');
+  if (existing) existing.remove();
+
+  const defaultMsg = buildMessage(name, car, date, carUrl, lfpUrl);
+
+  const popup = document.createElement('div');
+  popup.id = 'msgPopup';
+  popup.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;';
+  popup.innerHTML = `
+    <div style="background:#141414;border:0.5px solid rgba(255,255,255,0.15);border-radius:14px;padding:20px;width:100%;max-width:480px;margin-top:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-size:15px;font-weight:500;color:#f0f0f0;">💬 상담 후 메시지</div>
+        <button onclick="document.getElementById('msgPopup').remove()" style="background:transparent;border:none;color:#555;font-size:18px;cursor:pointer;">✕</button>
+      </div>
+      <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">차종 블로그 URL</div>
+      <input id="msg-car-url" type="url" value="${carUrl}" placeholder="차종 블로그 URL" style="width:100%;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:13px;padding:10px;outline:none;font-family:inherit;margin-bottom:10px;" oninput="updateMsgPreview('${name}','${car}','${date}')">
+      <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">LFP 배터리 블로그 URL</div>
+      <input id="msg-lfp-url" type="url" value="${lfpUrl}" placeholder="LFP 블로그 URL" style="width:100%;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:13px;padding:10px;outline:none;font-family:inherit;margin-bottom:14px;" oninput="updateMsgPreview('${name}','${car}','${date}')">
+      <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">발송 메시지 <span style="color:rgba(232,213,163,0.5);">(직접 수정 가능)</span></div>
+      <textarea id="msg-text" style="width:100%;height:220px;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:13px;padding:12px;outline:none;font-family:inherit;resize:none;line-height:1.8;">${defaultMsg}</textarea>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button onclick="copyMessage()" style="flex:1;height:48px;background:#e8d5a3;color:#1a1200;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">📋 복사</button>
+        <button onclick="updateMsgPreview('${name}','${car}','${date}')" style="width:48px;height:48px;background:var(--surface2);color:var(--text2);border:0.5px solid var(--border2);border-radius:8px;font-size:18px;cursor:pointer;">↺</button>
+      </div>
+      <div id="msg-copy-status" style="min-height:24px;margin-top:8px;text-align:center;font-size:12px;"></div>
+    </div>`;
+  document.body.appendChild(popup);
+  if (!carUrl) {
+    $('msg-copy-status').innerHTML='<span style="color:#e8a03a;">⚠ 설정 탭에서 차종 블로그 URL을 먼저 등록해주세요</span>';
+  }
+}
+
+function buildMessage(name, car, date, carUrl, lfpUrl) {
+  const carLine = carUrl ? `\n\n📌 ${car} 관련 자료\n${carUrl}` : '';
+  const lfpLine = lfpUrl ? `\n\n🔋 BYD LFP 배터리 정보\n${lfpUrl}` : '';
+  return `안녕하십니까 ${name} 고객님! 😊\n\n오늘 BYD 서초전시장에서 상담 도와드린 남광희 대리입니다.\n\n바쁘신 가운데 방문해 주셔서 진심으로 감사드립니다.\n오늘 상담해 드렸던 ${car} 관련 자료를 보내드리니 편하실 때 참고해 보시고, 추가로 궁금하신 사항이 있으시면 언제든지 편한 시간에 연락 주시면 성심껏 도와드리겠습니다!${carLine}${lfpLine}\n\n📞 남광희 대리\nBYD 서초전시장\n010-2055-3180`;
+}
+
+function updateMsgPreview(name, car, date) {
+  const carUrl = $('msg-car-url').value.trim();
+  const lfpUrl = $('msg-lfp-url').value.trim();
+  $('msg-text').value = buildMessage(name||'고객', car||'', date||'', carUrl, lfpUrl);
+}
+
+async function copyMessage() {
+  const text = $('msg-text').value;
+  const status = $('msg-copy-status');
+  try {
+    await navigator.clipboard.writeText(text);
+    status.innerHTML = '<span style="color:#5aaa7a;">✓ 복사됐습니다! 카톡/문자에 붙여넣기 하세요</span>';
+    setTimeout(()=>{ status.innerHTML=''; $('msgPopup').remove(); }, 2000);
+  } catch(e) {
+    $('msg-text').select();
+    status.innerHTML = '<span style="color:#e8a03a;">텍스트를 선택했습니다. 직접 복사해주세요</span>';
+  }
+}
+
+// ── 연락처 저장 (vCard) ──
+function saveContact() {
+  const name  = $('f-name').value.trim();
+  const phone = $('f-phone').value.trim();
+  const car   = $('f-car').value.trim();
+  const date  = ($('f-date').value||today()).replace(/-/g,'').slice(2);
+  const next  = $('f-next').value.trim();
+  const memo  = $('f-memo').value.trim();
+  if (!phone) { alert('연락처를 먼저 입력해주세요'); return; }
+  showVCardPopup({ name, phone, car, date, next, memo });
+}
+
+function showVCardPopup(data) {
+  const existing = $('vcardPopup');
+  if (existing) existing.remove();
+  const defaultContactName = [data.date, data.name ? data.name+' 고객님' : '', data.car].filter(Boolean).join(' ');
+  const defaultMemo = [data.date+' 상담', data.memo, data.next ? '다음: '+data.next : ''].filter(Boolean).join(' / ');
+  const popup = document.createElement('div');
+  popup.id = 'vcardPopup';
+  popup.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+  popup.innerHTML = `
+    <div style="background:#141414;border:0.5px solid rgba(255,255,255,0.15);border-radius:14px;padding:20px;width:100%;max-width:420px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-size:15px;font-weight:500;color:#f0f0f0;">📱 연락처 저장</div>
+        <button onclick="document.getElementById('vcardPopup').remove()" style="background:transparent;border:none;color:#555;font-size:18px;cursor:pointer;">✕</button>
+      </div>
+      <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">연락처명</div>
+      <input id="vc-name" type="text" value="${defaultContactName}" style="width:100%;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:14px;font-weight:500;padding:10px;outline:none;font-family:inherit;margin-bottom:12px;">
+      <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">전화번호</div>
+      <input id="vc-phone" type="tel" value="${data.phone}" style="width:100%;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:14px;font-weight:500;padding:10px;outline:none;font-family:inherit;margin-bottom:12px;">
+      <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">연락처 메모</div>
+      <textarea id="vc-memo" style="width:100%;height:80px;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:13px;padding:10px;outline:none;font-family:inherit;resize:none;line-height:1.6;">${defaultMemo}</textarea>
+      <button onclick="downloadVCard()" style="width:100%;height:48px;background:#e8d5a3;color:#1a1200;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:12px;">📥 연락처 저장</button>
+    </div>`;
+  document.body.appendChild(popup);
+}
+
+function downloadVCard() {
+  const name  = $('vc-name').value.trim();
+  const phone = $('vc-phone').value.trim().replace(/-/g,'');
+  const memo  = $('vc-memo').value.trim();
+  if (!name || !phone) { alert('이름과 전화번호를 입력해주세요'); return; }
+  const vcard = ['BEGIN:VCARD','VERSION:3.0','FN:'+name,'N:'+name+';;;;','TEL;TYPE=CELL:'+phone,memo?'NOTE:'+memo.replace(/\n/g,'\\n'):'','END:VCARD'].filter(Boolean).join('\r\n');
+  const blob = new Blob([vcard], {type:'text/vcard;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=name+'.vcf'; a.click();
+  URL.revokeObjectURL(url);
+  setTimeout(()=>{ $('vcardPopup').remove(); }, 500);
+}
+
+// ── 고객 목록 렌더 ──
+function getRecords(){return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');}
+
+function willBadgeHtml(will) {
+  if (will === null || will === undefined) return '';
+  return `<span class="will-badge will-${will}">${will}%</span>`;
+}
+
+function statusBadgeHtml(status) {
+  if (!status) return '';
+  return `<span class="status-badge st-${status}">${status}</span>`;
+}
+
+function renderHistory() {
+  const list = getRecords();
+  $('totalCount').textContent = list.length+'건';
+  const el = $('historyList');
+  const query = ($('searchInput')||{value:''}).value.toLowerCase().trim();
+  const filtered = query
+    ? list.filter(r => (r.name||'').includes(query)||(r.phone||'').includes(query)||(r.car||'').toLowerCase().includes(query))
+    : list;
+  if (!filtered.length) { el.innerHTML='<div class="empty-state">저장된 기록이 없습니다</div>'; return; }
+  el.innerHTML = filtered.map((r,i) => {
+    const origIdx = list.indexOf(r);
+    return `
+    <div class="record-item" style="position:relative;">
+      <div onclick="loadRecordForEdit(${origIdx})" style="padding-right:40px;cursor:pointer;">
+        <div class="record-top">
+          <span class="record-name">${r.name||'미상'}</span>
+          <span class="record-car">${r.car||'미정'}</span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;margin-top:3px;flex-wrap:wrap;">
+          ${statusBadgeHtml(r.status)}
+          ${willBadgeHtml(r.will)}
+        </div>
+        <div class="record-meta" style="margin-top:4px;">${r.date||''} · ${r.phone||''} · ${r.contact||'-'}</div>
+        <div class="record-next">→ ${r.next||'-'}</div>
+        ${r.followups&&r.followups.length ? `<div style="font-size:11px;color:var(--text3);margin-top:3px;">팔로업 ${r.followups.length}회</div>` : ''}
+      </div>
+      <button onclick="deleteRecord(${origIdx},event)" style="position:absolute;top:50%;right:10px;transform:translateY(-50%);background:transparent;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:6px;line-height:1;">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function deleteRecord(i, e) {
+  e.stopPropagation();
+  const list = getRecords();
+  const r = list[i];
+  if (!confirm('"'+(r.name||'미상')+'" 기록을 삭제할까요?')) return;
+  list.splice(i,1);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  renderHistory();
+}
+
+// 고객 수정 팝업
+function loadRecordForEdit(i) {
+  const list = getRecords();
+  const r = list[i];
+  showEditPopup(r, i);
+}
+
+function showEditPopup(r, idx) {
+  const existing = $('editPopup');
+  if (existing) existing.remove();
+
+  const fuHtml = (r.followups||[]).map((f,fi) => `
+    <div class="history-block">
+      <div class="history-date">${f.date||''} · ${f.contact||''}</div>
+      <div class="history-text">${f.memo||''}</div>
+      ${f.will!==null&&f.will!==undefined ? `<span class="will-badge will-${f.will}" style="margin-top:4px;display:inline-flex;">${f.will}%</span>` : ''}
+      ${f.status ? `<span class="status-badge st-${f.status}" style="margin-top:4px;margin-left:4px;display:inline-flex;">${f.status}</span>` : ''}
+    </div>`).join('');
+
+  const popup = document.createElement('div');
+  popup.id = 'editPopup';
+  popup.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;overflow-y:auto;padding:16px;';
+
+  popup.innerHTML = `
+    <div style="background:#141414;border:0.5px solid rgba(255,255,255,0.15);border-radius:14px;padding:20px;width:100%;max-width:480px;margin:0 auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-size:15px;font-weight:500;color:#f0f0f0;">${r.name||'미상'} 고객</div>
+        <button onclick="document.getElementById('editPopup').remove()" style="background:transparent;border:none;color:#555;font-size:18px;cursor:pointer;">✕</button>
+      </div>
+
+      <!-- 기본 정보 -->
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:0.06em;">기본 정보</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+        ${['date:날짜','name:고객명','phone:연락처','car:관심차종','contact:컨택유형','region:거주지','next:다음액션','memo:메모','quote:견적내용'].map(kl=>{
+          const [k,l]=kl.split(':');
+          return `<div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:11px;color:var(--text3);min-width:68px;font-family:'DM Mono',monospace;">${l}</span>
+            <input id="edit-${k}" type="text" value="${(r[k]||'').replace(/"/g,'&quot;')}" style="flex:1;background:#1c1c1c;border:none;border-bottom:0.5px solid rgba(255,255,255,0.1);color:#f0f0f0;font-family:'Noto Sans KR',sans-serif;font-size:14px;padding:6px 0;outline:none;">
+          </div>`;
+        }).join('')}
+      </div>
+
+      <!-- 출고 의지 -->
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:0.06em;">출고 의지</div>
+      <div class="will-group" id="editWillGroup" style="margin-bottom:14px;">
+        ${[0,30,50,80,100].map(v=>`<button class="will-btn${r.will===v?' active-'+v:''}" data-v="${v}" onclick="selectEditWill(${v})">${v}%</button>`).join('')}
+      </div>
+
+      <!-- 고객 상태 -->
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:0.06em;">고객 상태</div>
+      <div class="status-group" id="editStatusGroup" style="margin-bottom:14px;">
+        ${['신규','진행중','계약','출고완료','이탈'].map(v=>`<button class="status-btn${r.status===v?' sel-'+v:''}" data-v="${v}" onclick="selectEditStatus('${v}')">${v}</button>`).join('')}
+      </div>
+
+      <!-- 팔로업 이력 -->
+      ${fuHtml ? `<div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:0.06em;">팔로업 이력 (${(r.followups||[]).length}회)</div>${fuHtml}<div style="height:14px;"></div>` : ''}
+
+      <!-- 저장 버튼 -->
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button onclick="saveEditRecord(${idx})" style="flex:2;height:48px;background:#1a2a1a;color:#5aaa7a;border:0.5px solid rgba(90,170,122,0.3);border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;">💾 수정 저장</button>
+        <button onclick="showMessagePopup('${(r.name||'').replace(/'/g,"\\'")}','${(r.car||'').replace(/'/g,"\\'")}');document.getElementById('editPopup').remove();" style="flex:1;height:48px;background:transparent;color:#e8d5a3;border:0.5px solid rgba(232,213,163,0.3);border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;">💬 메시지</button>
+      </div>
+      <div id="editSaveStatus" style="min-height:24px;margin-top:8px;"></div>
+    </div>`;
+
+  document.body.appendChild(popup);
+
+  // 현재 수정 중인 레코드의 will/status 저장
+  window._editWill = r.will !== undefined ? r.will : null;
+  window._editStatus = r.status || '신규';
+}
+
+let _editWill = null;
+let _editStatus = '신규';
+
+function selectEditWill(v) {
+  window._editWill = v;
+  document.querySelectorAll('#editWillGroup .will-btn').forEach(btn => {
+    btn.className = 'will-btn';
+    if (parseInt(btn.dataset.v) === v) btn.classList.add('active-'+v);
+  });
+}
+
+function selectEditStatus(v) {
+  window._editStatus = v;
+  document.querySelectorAll('#editStatusGroup .status-btn').forEach(btn => {
+    btn.className = 'status-btn';
+    if (btn.dataset.v === v) btn.classList.add('sel-'+v);
+  });
+}
+
+async function saveEditRecord(idx) {
+  const list = getRecords();
+  const r = list[idx];
+  const fields = ['date','name','phone','car','contact','region','next','memo','quote'];
+  fields.forEach(k => {
+    const el = $('edit-'+k);
+    if (el) r[k] = el.value;
+  });
+  r.will   = window._editWill;
+  r.status = window._editStatus || '신규';
+
+  list[idx] = r;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+
+  // 웹훅 동기화
+  const {webhook} = cfg();
+  if (webhook) {
+    try {
+      await fetch(webhook,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({...r, action:'update_record'})});
+    } catch(e){}
+  }
+
+  $('editSaveStatus').innerHTML = '<span class="badge badge-ok"><span class="dot"></span>저장 완료 ✓</span>';
+  setTimeout(()=>{
+    $('editPopup').remove();
+    renderHistory();
+  }, 1200);
+}
+
+// ── 팔로업 ──
+function daysSince(dateStr) {
+  if (!dateStr) return 999;
+  const d = new Date(dateStr);
+  if (isNaN(d)) return 999;
+  return Math.floor((Date.now()-d.getTime())/86400000);
+}
+
+function getLastDate(r) {
+  // 팔로업이 있으면 마지막 팔로업 날짜, 없으면 최초 저장 날짜
+  if (r.followups && r.followups.length > 0) {
+    return r.followups[r.followups.length-1].date || r.date;
+  }
+  return r.date;
+}
+
+function setFollowupFilter(f) {
+  followupFilter = f;
+  ['all','urgent','soon','ok'].forEach(k => {
+    $('ff-'+k).classList.toggle('active', k===f);
+  });
+  renderFollowup();
+}
+
+function renderFollowup() {
+  const list = getRecords();
+  const el = $('followupList');
+  // 이탈 고객 제외
+  const enriched = list
+    .map((r,i) => ({...r, idx:i, days:daysSince(getLastDate(r))}))
+    .filter(r => r.status !== '이탈' && r.status !== '출고완료')
+    .sort((a,b) => b.days-a.days);
+
+  const filtered = enriched.filter(r => {
+    if (followupFilter==='urgent') return r.days >= 7;
+    if (followupFilter==='soon')   return r.days >= 3 && r.days < 7;
+    if (followupFilter==='ok')     return r.days < 3;
+    return true;
+  });
+
+  if (!filtered.length) { el.innerHTML='<div class="empty-state">해당 조건의 고객이 없습니다</div>'; return; }
+
+  el.innerHTML = filtered.map(r => {
+    const d = r.days;
+    const cls = d>=7?'urgent':d>=3?'soon':'ok';
+    const lbl = d===0?'오늘':d>=999?'?':d+'일전';
+    return `
+    <div class="followup-item">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div class="followup-days ${cls}">${lbl}</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:500;">${r.name||'미상'} <span style="font-size:11px;color:var(--text3);font-family:monospace;">${r.car||''}</span></div>
+          <div style="font-size:12px;color:var(--text3);margin-top:1px;">${r.phone||''}</div>
+        </div>
+        <div style="display:flex;gap:4px;flex-direction:column;align-items:flex-end;">
+          ${statusBadgeHtml(r.status)}
+          ${willBadgeHtml(r.will)}
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px;">→ ${r.next||r.memo||'다음 액션 없음'}</div>
+      <button onclick="showFollowupInput(${r.idx})" style="width:100%;height:38px;background:rgba(232,213,163,0.08);border:0.5px solid rgba(232,213,163,0.25);border-radius:8px;color:#e8d5a3;font-size:13px;cursor:pointer;font-family:inherit;">✦ 팔로업 내용 입력</button>
+    </div>`;
+  }).join('');
+}
+
+// 팔로업 입력 팝업
+function showFollowupInput(idx) {
+  const list = getRecords();
+  const r = list[idx];
+  const existing = $('fuPopup');
+  if (existing) existing.remove();
+
+  const popup = document.createElement('div');
+  popup.id = 'fuPopup';
+  popup.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;overflow-y:auto;padding:16px;';
+
+  popup.innerHTML = `
+    <div style="background:#141414;border:0.5px solid rgba(255,255,255,0.15);border-radius:14px;padding:20px;width:100%;max-width:480px;margin:0 auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <div style="font-size:15px;font-weight:500;color:#f0f0f0;">📋 팔로업 — ${r.name||'미상'}</div>
+        <button onclick="document.getElementById('fuPopup').remove()" style="background:transparent;border:none;color:#555;font-size:18px;cursor:pointer;">✕</button>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:16px;">${r.car||''} · ${r.phone||''}</div>
+
+      <!-- 입력 모드 -->
+      <div style="display:flex;gap:6px;margin-bottom:12px;">
+        <button class="mode-btn active" id="fuModeText"    onclick="switchFuMode('text')">✏️ 텍스트</button>
+        <button class="mode-btn"        id="fuModePhoto"   onclick="switchFuMode('photo')">📷 카메라</button>
+        <button class="mode-btn"        id="fuModeGallery" onclick="switchFuMode('gallery')">🖼️ 갤러리</button>
+      </div>
+
+      <!-- 텍스트 -->
+      <div id="fuTextArea">
+        <textarea id="fuRawInput" placeholder="예: 오늘 전화통화. 이번주 토요일 시승 예약. 씰AWD 관심으로 바뀜.&#10;&#10;나눈 내용 자유롭게 입력 →" style="width:100%;min-height:120px;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:14px;padding:12px;outline:none;font-family:inherit;resize:none;line-height:1.7;"></textarea>
+        <button onclick="analyzeFuText(${idx})" id="fuAnalyzeBtn" style="width:100%;height:44px;background:#e8d5a3;color:#1a1200;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px;">
+          <span id="fuAnalyzeBtnContent">✦ &nbsp;AI로 정리</span>
+        </button>
+      </div>
+
+      <!-- 사진 -->
+      <div id="fuPhotoArea" style="display:none;">
+        <input type="file" id="fuCameraInput"  accept="image/*" capture="environment" style="display:none;" onchange="handleFuPhoto(this)">
+        <input type="file" id="fuGalleryInput" accept="image/*"                       style="display:none;" onchange="handleFuPhoto(this)">
+        <div id="fuPhotoPreview" style="display:none;margin-bottom:12px;">
+          <img id="fuPreviewImg" style="width:100%;border-radius:8px;border:0.5px solid rgba(255,255,255,0.08);">
+          <button onclick="clearFuPhoto()" style="background:transparent;border:none;color:#555;font-size:12px;cursor:pointer;margin-top:6px;">✕ 사진 제거</button>
+        </div>
+        <div id="fuPhotoPlaceholder">
+          <div onclick="triggerFuPhoto()" style="border:1.5px dashed rgba(255,255,255,0.15);border-radius:8px;padding:24px;text-align:center;cursor:pointer;">
+            <div style="font-size:28px;margin-bottom:6px;" id="fuPhotoIcon">📷</div>
+            <div style="font-size:13px;color:#888;" id="fuPhotoTitle">탭하여 촬영</div>
+          </div>
+        </div>
+        <button onclick="analyzeFuPhoto(${idx})" id="fuAnalyzePhotoBtn" disabled style="width:100%;height:44px;background:#e8d5a3;color:#1a1200;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px;opacity:0.5;">
+          <span id="fuAnalyzePhotoBtnContent">사진을 먼저 선택해주세요</span>
+        </button>
+      </div>
+
+      <!-- 정리된 결과 (AI 분석 후 표시) -->
+      <div id="fuResult" style="display:none;margin-top:14px;">
+        <div style="height:0.5px;background:rgba(255,255,255,0.08);margin-bottom:14px;"></div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px;letter-spacing:0.06em;">정리된 내용 (수정 가능)</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:11px;color:var(--text3);min-width:68px;font-family:'DM Mono',monospace;">날짜</span>
+            <input id="fu-date" type="text" style="flex:1;background:#1c1c1c;border:none;border-bottom:0.5px solid rgba(255,255,255,0.1);color:#f0f0f0;font-size:14px;padding:6px 0;outline:none;font-family:'Noto Sans KR',sans-serif;">
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:11px;color:var(--text3);min-width:68px;font-family:'DM Mono',monospace;">컨택유형</span>
+            <input id="fu-contact" type="text" style="flex:1;background:#1c1c1c;border:none;border-bottom:0.5px solid rgba(255,255,255,0.1);color:#f0f0f0;font-size:14px;padding:6px 0;outline:none;font-family:'Noto Sans KR',sans-serif;">
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:11px;color:var(--text3);min-width:68px;font-family:'DM Mono',monospace;">다음액션</span>
+            <input id="fu-next" type="text" style="flex:1;background:#1c1c1c;border:none;border-bottom:0.5px solid rgba(255,255,255,0.1);color:#f0f0f0;font-size:14px;padding:6px 0;outline:none;font-family:'Noto Sans KR',sans-serif;">
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;">
+            <span style="font-size:11px;color:var(--text3);min-width:68px;font-family:'DM Mono',monospace;padding-top:6px;">내용요약</span>
+            <textarea id="fu-memo" style="flex:1;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:6px;color:#f0f0f0;font-size:13px;padding:8px;outline:none;font-family:'Noto Sans KR',sans-serif;resize:none;min-height:70px;line-height:1.6;"></textarea>
+          </div>
+        </div>
+
+        <!-- 출고 의지 업데이트 -->
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:0.06em;">출고 의지 업데이트</div>
+        <div class="will-group" id="fuWillGroup" style="margin-bottom:14px;">
+          ${[0,30,50,80,100].map(v=>`<button class="will-btn${r.will===v?' active-'+v:''}" data-v="${v}" onclick="selectFuWill(${v})">${v}%</button>`).join('')}
+        </div>
+
+        <!-- 상태 업데이트 -->
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:0.06em;">고객 상태 업데이트</div>
+        <div class="status-group" id="fuStatusGroup" style="margin-bottom:16px;">
+          ${['신규','진행중','계약','출고완료','이탈'].map(v=>`<button class="status-btn${r.status===v?' sel-'+v:''}" data-v="${v}" onclick="selectFuStatus('${v}')">${v}</button>`).join('')}
+        </div>
+
+        <button onclick="saveFuRecord(${idx})" style="width:100%;height:48px;background:#1a2a1a;color:#5aaa7a;border:0.5px solid rgba(90,170,122,0.3);border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;">💾 팔로업 저장</button>
+        <div id="fuSaveStatus" style="min-height:24px;margin-top:8px;text-align:center;"></div>
+      </div>
+    </div>`;
+
+  document.body.appendChild(popup);
+  window._fuWill   = r.will !== undefined ? r.will : null;
+  window._fuStatus = r.status || '신규';
+  window._fuMode   = 'text';
+}
+
+function switchFuMode(m) {
+  window._fuMode = m;
+  ['text','photo','gallery'].forEach(k => {
+    const el = $('fuMode'+k.charAt(0).toUpperCase()+k.slice(1));
+    if (el) el.classList.toggle('active', k===m);
+  });
+  $('fuTextArea').style.display  = m==='text' ? 'block':'none';
+  $('fuPhotoArea').style.display = (m==='photo'||m==='gallery') ? 'block':'none';
+  if (m==='photo') {
+    $('fuPhotoIcon').textContent='📷'; $('fuPhotoTitle').textContent='탭하여 촬영';
+  } else if (m==='gallery') {
+    $('fuPhotoIcon').textContent='🖼️'; $('fuPhotoTitle').textContent='탭하여 사진 선택';
+  }
+}
+
+function triggerFuPhoto() {
+  window._fuMode==='photo' ? $('fuCameraInput').click() : $('fuGalleryInput').click();
+}
+function handleFuPhoto(input) {
+  const file=input.files[0]; if(!file) return;
+  fuImgType=file.type||'image/jpeg';
+  const r=new FileReader();
+  r.onload=e=>{
+    fuImgBase64=e.target.result.split(',')[1];
+    $('fuPreviewImg').src=e.target.result;
+    $('fuPhotoPreview').style.display='block';
+    $('fuPhotoPlaceholder').style.display='none';
+    $('fuAnalyzePhotoBtn').disabled=false;
+    $('fuAnalyzePhotoBtn').style.opacity='1';
+    $('fuAnalyzePhotoBtnContent').innerHTML='✦ &nbsp;사진 분석하기';
+  };
+  r.readAsDataURL(file); input.value='';
+}
+function clearFuPhoto() {
+  fuImgBase64=null;
+  $('fuPhotoPreview').style.display='none';
+  $('fuPhotoPlaceholder').style.display='block';
+  $('fuAnalyzePhotoBtn').disabled=true;
+  $('fuAnalyzePhotoBtn').style.opacity='0.5';
+  $('fuAnalyzePhotoBtnContent').textContent='사진을 먼저 선택해주세요';
+}
+
+function fuJsonPrompt() {
+  return `반드시 JSON만 출력 (마크다운·설명 없이):
+{
+  "date":"날짜(YYYY-MM-DD, 없으면 ${today()})",
+  "contact":"컨택유형(방문/전화/문자/카카오/SNS/기타)",
+  "next":"다음 액션 요약",
+  "memo":"이번 상담 내용 요약 (2-3줄)"
+}`;
+}
+
+async function analyzeFuText(idx) {
+  const raw=$('fuRawInput').value.trim();
+  if (!raw) { alert('내용을 입력해주세요'); return; }
+  const btn=$('fuAnalyzeBtn'); btn.disabled=true;
+  $('fuAnalyzeBtnContent').innerHTML='<span class="spinner"></span>&nbsp; 분석 중...';
+  try {
+    const prompt = `당신은 BYD 전기차 영업 어시스턴트입니다. 아래 팔로업 상담 내용을 분석해 정보를 추출해주세요.\n\n입력:\n${JSON.stringify(raw)}\n\n${fuJsonPrompt()}`;
+    const d=await claude([{role:'user',content:prompt}]);
+    if (d) fillFuResult(d);
+  } catch(e){alert('분석 실패: '+e.message);}
+  finally{btn.disabled=false;$('fuAnalyzeBtnContent').innerHTML='✦ &nbsp;AI로 정리';}
+}
+
+async function analyzeFuPhoto(idx) {
+  if (!fuImgBase64){alert('사진을 먼저 선택해주세요');return;}
+  const btn=$('fuAnalyzePhotoBtn'); btn.disabled=true;
+  $('fuAnalyzePhotoBtnContent').innerHTML='<span class="spinner"></span>&nbsp; 분석 중...';
+  try {
+    const prompt = `당신은 BYD 전기차 영업 어시스턴트입니다. 이 이미지(카카오톡/문자 캡처)에서 팔로업 상담 내용을 분석해 정보를 추출해주세요.\n왼쪽 말풍선=고객, 오른쪽=영업사원\n\n${fuJsonPrompt()}`;
+    const d=await claude([{role:'user',content:[
+      {type:'image',source:{type:'base64',media_type:fuImgType,data:fuImgBase64}},
+      {type:'text',text:prompt}
+    ]}]);
+    if (d) fillFuResult(d);
+  } catch(e){alert('분석 실패: '+e.message);}
+  finally{btn.disabled=false;$('fuAnalyzePhotoBtnContent').innerHTML='✦ &nbsp;사진 분석하기';}
+}
+
+function fillFuResult(d) {
+  const txt=(d.content||[]).map(i=>i.text||'').join('');
+  if (!txt) throw new Error('AI 응답 없음');
+  const p=JSON.parse(txt.replace(/```json|```/g,'').trim());
+  $('fu-date').value    = p.date    || today();
+  $('fu-contact').value = p.contact || '';
+  $('fu-next').value    = p.next    || '';
+  $('fu-memo').value    = p.memo    || '';
+  $('fuResult').style.display='block';
+  $('fuResult').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function selectFuWill(v) {
+  window._fuWill = v;
+  document.querySelectorAll('#fuWillGroup .will-btn').forEach(btn => {
+    btn.className='will-btn';
+    if (parseInt(btn.dataset.v)===v) btn.classList.add('active-'+v);
+  });
+}
+
+function selectFuStatus(v) {
+  window._fuStatus = v;
+  document.querySelectorAll('#fuStatusGroup .status-btn').forEach(btn => {
+    btn.className='status-btn';
+    if (btn.dataset.v===v) btn.classList.add('sel-'+v);
+  });
+}
+
+async function saveFuRecord(idx) {
+  const list = getRecords();
+  const r = list[idx];
+
+  const fuEntry = {
+    date:    $('fu-date').value    || today(),
+    contact: $('fu-contact').value || '',
+    next:    $('fu-next').value    || '',
+    memo:    $('fu-memo').value    || '',
+    will:    window._fuWill,
+    status:  window._fuStatus || r.status
+  };
+
+  // 팔로업 이력 추가
+  if (!r.followups) r.followups = [];
+  r.followups.push(fuEntry);
+
+  // 다음액션, 의지, 상태 업데이트
+  if (fuEntry.next)   r.next   = fuEntry.next;
+  if (window._fuWill !== null && window._fuWill !== undefined) r.will = window._fuWill;
+  if (window._fuStatus) r.status = window._fuStatus;
+
+  list[idx] = r;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+
+  // 웹훅 (팔로업)
+  const {webhook} = cfg();
+  let msg = '로컬 ✓';
+  if (webhook) {
+    try {
+      await fetch(webhook,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({...r, action:'followup_update', followupEntry: fuEntry})});
+      msg = '로컬 ✓ · 노션 이력 추가 ✓';
+    } catch(e){ msg='로컬 ✓ · 전송 실패'; }
+  } else { msg='로컬 ✓ · 웹훅 미설정'; }
+
+  $('fuSaveStatus').innerHTML=`<span style="color:#5aaa7a;font-size:12px;">✓ ${msg}</span>`;
+  setTimeout(()=>{
+    $('fuPopup').remove();
+    renderFollowup();
+  }, 1500);
+}
+
+// ── 설정 렌더 ──
+function renderSettings() {
+  const s=cfg();
+  $('webhookUrl').value=s.webhook;
+  $('apiKey').value=s.apiKey;
+  $('settingsCount').textContent=getRecords().length+'건';
+  loadUrlSettings();
+}
+
+async function testWebhook() {
+  const url=$('webhookUrl').value.trim();
+  if (!url){alert('URL을 먼저 입력해주세요');return;}
+  $('webhookTestStatus').innerHTML='<span class="badge badge-info"><span class="dot"></span>테스트 중...</span>';
+  try {
+    const res=await fetch(url);
+    const d=await res.json();
+    $('webhookTestStatus').innerHTML=d.result==='ok'
+      ?'<span class="badge badge-ok"><span class="dot"></span>연결 성공 ✓</span>'
+      :'<span class="badge badge-err"><span class="dot"></span>응답 오류</span>';
+  } catch(e){
+    $('webhookTestStatus').innerHTML='<span class="badge badge-err"><span class="dot"></span>연결 실패</span>';
+  }
+}
+
+// ── 노션 DB 동기화 ──
+async function syncFromNotion() {
+  const {webhook} = cfg();
+  if (!webhook) { alert('설정 탭에서 웹훅 URL을 먼저 입력해주세요.'); return; }
+
+  const btn = $('syncBtn'); btn.disabled = true;
+  $('syncBtnContent').innerHTML = '<span class="spinner spinner-light"></span>&nbsp; 불러오는 중...';
+  $('syncStatus').innerHTML = '';
+
+  try {
+    const res = await fetch(webhook + '?action=getCustomers');
+    const data = await res.json();
+
+    if (data.result !== 'success') throw new Error(data.message || '응답 오류');
+
+    const customers = data.customers || [];
+    if (!customers.length) {
+      $('syncStatus').innerHTML = '<span class="badge badge-info"><span class="dot"></span>노션에 저장된 고객이 없습니다</span>';
+      return;
+    }
+
+    // 노션 데이터를 로컬 포맷으로 변환
+    const converted = customers.map(c => ({
+      date:      c.date      || '',
+      name:      c.name      || '',
+      phone:     c.phone     || '',
+      car:       c.car       || '',
+      contact:   c.contact   || '',
+      region:    c.region    || '',
+      next:      c.next      || '',
+      memo:      c.memo      || '',
+      quote:     c.quote     || '',
+      will:      c.will !== undefined ? c.will : null,
+      status:    c.status    || '신규',
+      savedAt:   c.savedAt   || '',
+      followups: c.followups || [],
+      notionId:  c.notionId  || ''
+    }));
+
+    // 노션 우선으로 덮어쓰기
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(converted));
+
+    $('syncStatus').innerHTML = `<span class="badge badge-ok"><span class="dot"></span>노션에서 ${customers.length}명 불러옴 ✓</span>`;
+    $('settingsCount').textContent = customers.length + '건';
+
+  } catch(e) {
+    $('syncStatus').innerHTML = `<span class="badge badge-err"><span class="dot"></span>불러오기 실패: ${e.message}</span>`;
+  } finally {
+    btn.disabled = false;
+    $('syncBtnContent').innerHTML = '☁️ &nbsp;노션에서 DB 불러오기';
+  }
+}
+
+
+function clearAll() {
+  if (confirm('저장된 기록을 모두 삭제할까요?')){
+    localStorage.removeItem(STORAGE_KEY);
+    renderSettings();
+    alert('삭제 완료');
+  }
+}
+
+// ── 날짜 / 전화번호 자동 포맷 ──
+function autoFormatDate(input) {
+  let v = input.value.replace(/[^0-9]/g,'');
+  let formatted = '';
+  if (v.length===6)      formatted='20'+v.slice(0,2)+'-'+v.slice(2,4)+'-'+v.slice(4,6);
+  else if (v.length===8) formatted=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);
+  if (formatted) {
+    const d=new Date(formatted);
+    if (!isNaN(d)) {
+      input.value=formatted;
+      input.style.color='var(--green)';
+      setTimeout(()=>{input.style.color='';},1000);
+    }
+  }
+}
+
+function autoFormatPhone(input) {
+  let v = input.value.replace(/[^0-9]/g,'');
+  let formatted='';
+  if      (v.length===11&&v.startsWith('0'))  formatted=v.slice(0,3)+'-'+v.slice(3,7)+'-'+v.slice(7,11);
+  else if (v.length===10&&v.startsWith('02')) formatted=v.slice(0,2)+'-'+v.slice(2,6)+'-'+v.slice(6,10);
+  else if (v.length===10)                      formatted=v.slice(0,3)+'-'+v.slice(3,6)+'-'+v.slice(6,10);
+  if (formatted) {
+    input.value=formatted;
+    input.style.color='var(--green)';
+    setTimeout(()=>{input.style.color='';},1000);
+  }
+}
+
+// ── 초기화 ──
+updateConn();
+selectStatus('신규');
+
+// 견적기에서 넘어온 파라미터 자동 입력
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('from')==='quotation') {
+    const name  = params.get('name')  || '';
+    const car   = params.get('car')   || '';
+    const quote = params.get('quote') || '';
+    if (name||car||quote) {
+      if (name)  $('f-name').value  = name;
+      if (car)   $('f-car').value   = car;
+      if (quote) $('f-quote').value = '견적: '+quote;
+      $('f-date').value = today();
+      $('resultSection').style.display='block';
+      setTimeout(()=>{
+        $('saveStatus').innerHTML='<span class="badge badge-info"><span class="dot"></span>견적기에서 데이터를 불러왔습니다. 나머지 정보를 입력 후 저장해주세요.</span>';
+      },300);
+    }
+  }
+})();
+
+// PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
