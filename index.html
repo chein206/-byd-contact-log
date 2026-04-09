@@ -8,7 +8,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BYD 상담기록">
 <meta name="theme-color" content="#0a0a0a">
-<link rel="manifest" href="manifest.json">
 <title>BYD 고객 상담 기록</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -18,13 +17,14 @@
     --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.15);
     --text:#f0f0f0; --text2:#888; --text3:#555;
     --accent:#e8d5a3; --accent2:#c4a96b;
-    --red:#e05a5a; --green:#5aaa7a; --blue:#5a8ae0;
+    --red:#e05a5a; --green:#5aaa7a; --blue:#5a8ae0; --orange:#e8a03a;
     --radius:14px; --radius-sm:8px;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
   html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;}
 
-  .header{position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:0.5px solid var(--border);padding:14px 20px 12px;display:flex;align-items:center;justify-content:space-between;}
+  /* ── 헤더 ── */
+  .header{position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:0.5px solid var(--border);padding:14px 20px 12px;display:flex;align-items:center;justify-content:space-between;}
   .logo-badge{background:var(--accent);color:#1a1200;font-size:11px;font-weight:700;letter-spacing:0.08em;padding:3px 8px;border-radius:4px;}
   .header-title{font-size:15px;font-weight:500;margin-left:10px;}
   .header-left{display:flex;align-items:center;}
@@ -32,33 +32,62 @@
   .conn-dot.on{background:var(--green);box-shadow:0 0 5px rgba(90,170,122,0.5);}
   .conn-label{font-size:11px;color:var(--text3);margin-left:5px;}
 
-  .tabs{display:flex;background:var(--surface);border-bottom:0.5px solid var(--border);}
-  .tab{flex:1;padding:12px 8px;text-align:center;font-size:13px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;}
+  /* ── 탭 ── */
+  .tabs{display:flex;background:var(--surface);border-bottom:0.5px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{flex:1;min-width:0;padding:12px 6px;text-align:center;font-size:13px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;}
   .tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500;}
 
-  .page{display:none;padding:16px;padding-bottom:40px;}
+  /* ── 페이지 ── */
+  .page{display:none;padding:16px;padding-bottom:60px;}
   .page.active{display:block;}
 
+  /* ── 카드 ── */
   .card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
   .card-label{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px;}
 
+  /* ── 입력 모드 탭 ── */
   .mode-tabs{display:flex;gap:6px;margin-bottom:12px;}
   .mode-btn{flex:1;padding:10px 4px;border-radius:var(--radius-sm);background:var(--surface);border:0.5px solid var(--border);color:var(--text3);font-family:'Noto Sans KR',sans-serif;font-size:12px;cursor:pointer;transition:all 0.15s;text-align:center;}
   .mode-btn.active{background:var(--surface2);border-color:var(--accent2);color:var(--accent);font-weight:500;}
 
+  /* ── 폼 요소 ── */
   textarea,input[type=text],input[type=url],input[type=tel]{width:100%;background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;padding:12px;outline:none;transition:border-color 0.2s;-webkit-appearance:none;}
   textarea:focus,input:focus{border-color:var(--accent2);}
   textarea{min-height:100px;resize:none;line-height:1.7;}
   input[type=text],input[type=url],input[type=tel]{height:44px;}
   ::placeholder{color:var(--text3);}
+  select{width:100%;height:44px;background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;padding:0 12px;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
 
-  /* 음성 */
-  .voice-wrap{text-align:center;padding:24px 0 16px;}
-  .voice-circle{width:80px;height:80px;border-radius:50%;background:var(--surface2);border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;margin:0 auto;cursor:pointer;transition:all 0.2s;font-size:32px;}
-  .voice-circle.recording{background:rgba(224,90,90,0.15);border-color:var(--red);animation:pulse 1s infinite;}
-  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
-  .voice-status{font-size:13px;color:var(--text3);margin-top:12px;}
+  /* ── 결과 그리드 ── */
+  .result-grid{display:flex;flex-direction:column;}
+  .result-row{display:flex;align-items:center;padding:9px 0;border-bottom:0.5px solid var(--border);gap:10px;}
+  .result-row:last-child{border-bottom:none;}
+  .result-key{font-size:11px;color:var(--text3);min-width:68px;font-family:'DM Mono',monospace;}
+  .result-input{flex:1;background:transparent;border:none;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;outline:none;border-bottom:0.5px solid transparent;padding-bottom:1px;transition:border-color 0.2s;}
+  .result-input:focus{border-bottom-color:var(--accent2);}
+  .result-select{flex:1;background:transparent;border:none;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer;}
+  .result-select option{background:var(--surface2);}
 
+  /* ── 출고의지 버튼 그룹 ── */
+  .will-group{display:flex;gap:5px;flex-wrap:wrap;}
+  .will-btn{flex:1;min-width:calc(20% - 4px);padding:8px 4px;border-radius:6px;background:var(--surface2);border:0.5px solid var(--border);color:var(--text3);font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:500;cursor:pointer;text-align:center;transition:all 0.15s;}
+  .will-btn.active-0{background:rgba(90,138,224,0.15);border-color:rgba(90,138,224,0.4);color:#5a8ae0;}
+  .will-btn.active-30{background:rgba(232,160,58,0.1);border-color:rgba(232,160,58,0.3);color:#e8a03a;}
+  .will-btn.active-50{background:rgba(232,160,58,0.15);border-color:rgba(232,160,58,0.4);color:#e8a03a;}
+  .will-btn.active-80{background:rgba(90,170,122,0.15);border-color:rgba(90,170,122,0.4);color:#5aaa7a;}
+  .will-btn.active-100{background:rgba(232,213,163,0.15);border-color:rgba(232,213,163,0.4);color:#e8d5a3;}
+
+  /* ── 상태 버튼 그룹 ── */
+  .status-group{display:flex;gap:5px;flex-wrap:wrap;}
+  .status-btn{flex:1;min-width:calc(33% - 4px);padding:8px 4px;border-radius:6px;background:var(--surface2);border:0.5px solid var(--border);color:var(--text3);font-family:'Noto Sans KR',sans-serif;font-size:11px;font-weight:500;cursor:pointer;text-align:center;transition:all 0.15s;}
+  .status-btn.sel-신규{background:rgba(90,138,224,0.15);border-color:rgba(90,138,224,0.4);color:#5a8ae0;}
+  .status-btn.sel-진행중{background:rgba(232,160,58,0.15);border-color:rgba(232,160,58,0.4);color:#e8a03a;}
+  .status-btn.sel-계약{background:rgba(90,170,122,0.15);border-color:rgba(90,170,122,0.4);color:#5aaa7a;}
+  .status-btn.sel-출고완료{background:rgba(232,213,163,0.15);border-color:rgba(232,213,163,0.4);color:#e8d5a3;}
+  .status-btn.sel-이탈{background:rgba(224,90,90,0.12);border-color:rgba(224,90,90,0.3);color:#e05a5a;}
+
+  /* ── 버튼 ── */
   .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:48px;border-radius:var(--radius-sm);font-family:'Noto Sans KR',sans-serif;font-size:15px;font-weight:500;cursor:pointer;border:none;transition:all 0.15s;}
   .btn:active{transform:scale(0.97);}
   .btn-primary{background:var(--accent);color:#1a1200;}
@@ -67,30 +96,29 @@
   .btn-outline{background:transparent;color:var(--text);border:0.5px solid var(--border2);}
   .btn-outline:hover{background:var(--surface2);}
   .btn-save{background:#1a2a1a;color:var(--green);border:0.5px solid rgba(90,170,122,0.3);}
+  .btn-sm{height:38px;font-size:13px;}
 
-  .photo-drop{border:1.5px dashed var(--border2);border-radius:var(--radius-sm);padding:32px 16px;text-align:center;cursor:pointer;transition:all 0.15s;}
+  /* ── 사진 ── */
+  .photo-drop{border:1.5px dashed var(--border2);border-radius:var(--radius-sm);padding:28px 16px;text-align:center;cursor:pointer;transition:all 0.15s;}
   .photo-drop:active{background:var(--surface2);}
   #previewImg{width:100%;border-radius:var(--radius-sm);border:0.5px solid var(--border);display:block;}
+  #fuPreviewImg{width:100%;border-radius:var(--radius-sm);border:0.5px solid var(--border);display:block;}
   .clear-photo{background:transparent;border:none;color:var(--text3);font-size:12px;cursor:pointer;margin-top:8px;display:block;}
 
-  .result-grid{display:flex;flex-direction:column;}
-  .result-row{display:flex;align-items:center;padding:9px 0;border-bottom:0.5px solid var(--border);gap:10px;}
-  .result-row:last-child{border-bottom:none;}
-  .result-key{font-size:11px;color:var(--text3);min-width:68px;font-family:'DM Mono',monospace;}
-  .result-input{flex:1;background:transparent;border:none;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;outline:none;border-bottom:0.5px solid transparent;padding-bottom:1px;transition:border-color 0.2s;}
-  .result-input:focus{border-bottom-color:var(--accent2);}
-
+  /* ── 배지/뱃지 ── */
   .badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border-radius:20px;margin-top:8px;}
   .badge-ok{background:rgba(90,170,122,0.15);color:var(--green);}
   .badge-err{background:rgba(224,90,90,0.15);color:var(--red);}
   .badge-info{background:rgba(90,138,224,0.15);color:var(--blue);}
   .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
 
+  /* ── 스피너 ── */
   .spinner{width:15px;height:15px;border-radius:50%;border:2px solid rgba(26,18,0,0.2);border-top-color:#1a1200;animation:spin 0.7s linear infinite;display:inline-block;}
   .spinner-light{border:2px solid var(--border);border-top-color:var(--accent);}
   @keyframes spin{to{transform:rotate(360deg);}}
 
-  .record-item{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;cursor:pointer;}
+  /* ── 고객 목록 ── */
+  .record-item{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;}
   .record-item:active{border-color:var(--border2);}
   .record-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
   .record-name{font-size:15px;font-weight:500;}
@@ -98,42 +126,56 @@
   .record-meta{font-size:12px;color:var(--text3);}
   .record-next{font-size:12px;color:var(--text2);margin-top:3px;}
 
+  /* ── 팔로업 ── */
+  .followup-item{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;}
+  .followup-days{font-size:11px;font-family:'DM Mono',monospace;min-width:36px;text-align:center;padding:4px 6px;border-radius:6px;font-weight:600;}
+  .followup-days.urgent{background:rgba(224,90,90,0.15);color:#e05a5a;}
+  .followup-days.soon{background:rgba(232,160,58,0.15);color:#e8a03a;}
+  .followup-days.ok{background:rgba(90,170,122,0.15);color:#5aaa7a;}
+
+  /* ── 출고의지 뱃지 ── */
+  .will-badge{display:inline-flex;align-items:center;font-size:11px;padding:2px 8px;border-radius:10px;font-family:'DM Mono',monospace;}
+  .will-0{background:rgba(90,138,224,0.12);color:#5a8ae0;}
+  .will-30{background:rgba(232,160,58,0.12);color:#e8a03a;}
+  .will-50{background:rgba(232,160,58,0.18);color:#e8a03a;}
+  .will-80{background:rgba(90,170,122,0.15);color:#5aaa7a;}
+  .will-100{background:rgba(232,213,163,0.15);color:#e8d5a3;}
+
+  /* ── 상태 뱃지 ── */
+  .status-badge{display:inline-flex;align-items:center;font-size:11px;padding:2px 8px;border-radius:10px;}
+  .st-신규{background:rgba(90,138,224,0.12);color:#5a8ae0;}
+  .st-진행중{background:rgba(232,160,58,0.15);color:#e8a03a;}
+  .st-계약{background:rgba(90,170,122,0.15);color:#5aaa7a;}
+  .st-출고완료{background:rgba(232,213,163,0.15);color:#e8d5a3;}
+  .st-이탈{background:rgba(224,90,90,0.12);color:#e05a5a;}
+
+  /* ── 설정 ── */
   .setting-label{font-size:13px;color:var(--text2);margin-bottom:6px;}
   .setting-desc{font-size:11px;color:var(--text3);margin-top:5px;line-height:1.6;}
   .setting-row{margin-bottom:14px;}
-  .empty-state{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px;line-height:2;}
   .hint{font-size:12px;color:var(--text3);margin-top:6px;line-height:1.6;}
   .count-pill{display:inline-block;font-size:11px;background:var(--surface2);color:var(--text3);padding:1px 7px;border-radius:10px;font-family:'DM Mono',monospace;border:0.5px solid var(--border);}
-
   .info-box{background:rgba(232,213,163,0.06);border:0.5px solid rgba(232,213,163,0.2);border-radius:var(--radius-sm);padding:12px;font-size:12px;color:var(--text2);line-height:1.8;}
+  .empty-state{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px;line-height:2;}
 
-  /* 온도 측정 */
-  .temp-hot  { background:rgba(224,90,90,0.15);  color:#e05a5a; border:0.5px solid rgba(224,90,90,0.3);  border-radius:20px; padding:3px 10px; font-size:12px; display:inline-flex; align-items:center; gap:4px; }
-  .temp-warm { background:rgba(232,160,58,0.15); color:#e8a03a; border:0.5px solid rgba(232,160,58,0.3); border-radius:20px; padding:3px 10px; font-size:12px; display:inline-flex; align-items:center; gap:4px; }
-  .temp-cold { background:rgba(90,138,224,0.15); color:#5a8ae0; border:0.5px solid rgba(90,138,224,0.3); border-radius:20px; padding:3px 10px; font-size:12px; display:inline-flex; align-items:center; gap:4px; }
-  .temp-none { background:var(--surface2); color:var(--text3); border:0.5px solid var(--border); border-radius:20px; padding:3px 10px; font-size:12px; display:inline-flex; align-items:center; gap:4px; }
+  /* ── 검색 ── */
+  .search-wrap{position:relative;margin-bottom:12px;}
+  .search-input{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;padding:10px 12px 10px 36px;width:100%;outline:none;height:40px;}
+  .search-input:focus{border-color:var(--accent2);}
+  .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none;}
 
-  .temp-result-box { background:var(--surface2); border:0.5px solid var(--border2); border-radius:var(--radius); padding:18px; margin-top:12px; }
-  .temp-score-row  { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
-  .temp-score-big  { font-size:42px; font-weight:700; line-height:1; }
-  .temp-label-big  { font-size:16px; font-weight:600; }
-  .temp-bar-wrap   { height:8px; background:var(--surface); border-radius:4px; overflow:hidden; margin-bottom:14px; }
-  .temp-bar-fill   { height:100%; border-radius:4px; transition:width 0.6s ease; }
-  .temp-section    { margin-bottom:14px; }
-  .temp-section-title { font-size:11px; color:var(--text3); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:6px; }
-  .temp-text       { font-size:13px; color:var(--text); line-height:1.75; }
-  .temp-strategy-item { display:flex; gap:8px; padding:8px 0; border-bottom:0.5px solid var(--border); font-size:13px; color:var(--text); line-height:1.6; }
-  .temp-strategy-item:last-child { border-bottom:none; }
-  .temp-num { color:var(--accent); font-weight:600; min-width:16px; font-family:'DM Mono',monospace; }
+  /* ── 팔로업 필터 ── */
+  .filter-row{display:flex;gap:6px;margin-bottom:14px;}
+  .filter-btn{flex:1;padding:8px 4px;border-radius:var(--radius-sm);background:var(--surface);border:0.5px solid var(--border);color:var(--text3);font-family:'Noto Sans KR',sans-serif;font-size:12px;cursor:pointer;transition:all 0.15s;text-align:center;}
+  .filter-btn.active{background:var(--surface2);border-color:var(--accent2);color:var(--accent);font-weight:500;}
 
-  .followup-item { background:var(--surface2); border:0.5px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:8px; display:flex; align-items:center; gap:12px; }
-  .followup-days { font-size:11px; font-family:'DM Mono',monospace; min-width:36px; text-align:center; padding:4px 6px; border-radius:6px; font-weight:600; }
-  .followup-days.urgent { background:rgba(224,90,90,0.15); color:#e05a5a; }
-  .followup-days.soon   { background:rgba(232,160,58,0.15); color:#e8a03a; }
-  .followup-days.ok     { background:rgba(90,170,122,0.15); color:#5aaa7a; }
-  .followup-info { flex:1; }
-  .followup-name { font-size:14px; font-weight:500; }
-  .followup-sub  { font-size:12px; color:var(--text3); margin-top:2px; }
+  /* ── 히스토리 블록 ── */
+  .history-block{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-top:8px;}
+  .history-date{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:4px;}
+  .history-text{font-size:13px;color:var(--text2);line-height:1.7;}
+
+  /* ── 구분선 ── */
+  .divider{height:0.5px;background:var(--border);margin:14px 0;}
 </style>
 </head>
 <body>
@@ -150,24 +192,24 @@
 </div>
 
 <div class="tabs">
-  <div class="tab active" onclick="switchTab('input')">✦ 새 기록</div>
-  <div class="tab" onclick="switchTab('history')">기록 목록</div>
-  <div class="tab" onclick="switchTab('temperature')">🌡️ 온도</div>
+  <div class="tab active" onclick="switchTab('input')">✦ 새기록</div>
   <div class="tab" onclick="switchTab('followup')">📋 팔로업</div>
+  <div class="tab" onclick="switchTab('history')">고객목록</div>
   <div class="tab" onclick="switchTab('settings')">설정</div>
 </div>
 
-<!-- 새 기록 -->
+<!-- ════════════════════════════════════
+     새기록 탭
+════════════════════════════════════ -->
 <div class="page active" id="tab-input">
 
   <div class="mode-tabs">
     <button class="mode-btn active" id="modeText"    onclick="switchMode('text')">✏️ 텍스트</button>
-    <button class="mode-btn"        id="modeVoice"   onclick="switchMode('voice')">🎤 음성</button>
     <button class="mode-btn"        id="modePhoto"   onclick="switchMode('photo')">📷 카메라</button>
     <button class="mode-btn"        id="modeGallery" onclick="switchMode('gallery')">🖼️ 갤러리</button>
   </div>
 
-  <!-- 텍스트 -->
+  <!-- 텍스트 입력 -->
   <div class="card" id="textCard">
     <div class="card-label">상담 내용 입력</div>
     <textarea id="rawInput" placeholder="예: 홍길동 고객, 010-1234-5678, 카카오로 연락. 씰 시승 문의. 경기도 거주. 이번주 일요일 10시 방문 예정&#10;&#10;자유롭게 입력하세요 →"></textarea>
@@ -179,26 +221,7 @@
     </div>
   </div>
 
-  <!-- 음성 -->
-  <div class="card" id="voiceCard" style="display:none;">
-    <div class="card-label">음성으로 입력</div>
-    <div class="voice-wrap">
-      <div class="voice-circle" id="voiceCircle" onclick="toggleVoice()">🎤</div>
-      <div class="voice-status" id="voiceStatus">탭하여 녹음 시작</div>
-    </div>
-    <div id="voiceTranscript" style="display:none;margin-bottom:12px;">
-      <div class="card-label">인식된 내용</div>
-      <div id="transcriptText" style="font-size:14px;color:var(--text);line-height:1.7;background:var(--surface2);padding:12px;border-radius:var(--radius-sm);"></div>
-    </div>
-    <div class="hint">고객명, 연락처, 차종, 다음 약속 등을 포함해서 말씀해주세요</div>
-    <div style="margin-top:10px;">
-      <button class="btn btn-primary" id="analyzeVoiceBtn" onclick="analyzeVoice()" disabled>
-        <span id="btnVoiceContent">음성을 먼저 녹음해주세요</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- 사진 -->
+  <!-- 사진 입력 -->
   <div class="card" id="photoCard" style="display:none;">
     <div class="card-label" id="photoCardLabel">고객 카드 / 대화 캡처</div>
     <input type="file" id="cameraInput"      accept="image/*" capture="environment" style="display:none;" onchange="handlePhoto(this)">
@@ -214,7 +237,7 @@
         <div style="font-size:12px;color:var(--text3);">명함 · 고객카드 · 카카오 대화 캡처 모두 인식</div>
       </div>
     </div>
-    <div class="hint" style="margin-top:10px;">카카오 대화 캡처 시 → 왼쪽(고객) 메시지에서 정보 추출, 오른쪽(내 메시지) 무시</div>
+    <div class="hint" style="margin-top:10px;">카카오 대화 캡처 시 → 왼쪽(고객) 메시지에서 정보 추출</div>
     <div style="margin-top:10px;">
       <button class="btn btn-primary" id="analyzePhotoBtn" onclick="analyzePhoto()" disabled>
         <span id="btnPhotoContent">사진을 먼저 선택해주세요</span>
@@ -222,7 +245,7 @@
     </div>
   </div>
 
-  <!-- 결과 -->
+  <!-- 결과 섹션 -->
   <div id="resultSection" style="display:none;">
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
@@ -241,8 +264,30 @@
         <div class="result-row"><span class="result-key">메모</span><input class="result-input" id="f-memo"></div>
       </div>
     </div>
-    <!-- 인라인 온도 결과 -->
-    <div id="inlineTempResult" style="display:none;background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;"></div>
+
+    <!-- 출고 의지 -->
+    <div class="card">
+      <div class="card-label">출고 의지</div>
+      <div class="will-group" id="willGroup">
+        <button class="will-btn" data-v="0"   onclick="selectWill(0)">0%</button>
+        <button class="will-btn" data-v="30"  onclick="selectWill(30)">30%</button>
+        <button class="will-btn" data-v="50"  onclick="selectWill(50)">50%</button>
+        <button class="will-btn" data-v="80"  onclick="selectWill(80)">80%</button>
+        <button class="will-btn" data-v="100" onclick="selectWill(100)">100%</button>
+      </div>
+    </div>
+
+    <!-- 고객 상태 -->
+    <div class="card">
+      <div class="card-label">고객 상태</div>
+      <div class="status-group" id="statusGroup">
+        <button class="status-btn" data-v="신규"   onclick="selectStatus('신규')">신규</button>
+        <button class="status-btn" data-v="진행중" onclick="selectStatus('진행중')">진행중</button>
+        <button class="status-btn" data-v="계약"   onclick="selectStatus('계약')">계약</button>
+        <button class="status-btn" data-v="출고완료" onclick="selectStatus('출고완료')">출고완료</button>
+        <button class="status-btn" data-v="이탈"   onclick="selectStatus('이탈')">이탈</button>
+      </div>
+    </div>
 
     <button class="btn btn-save" id="saveBtn" onclick="saveRecord()" style="margin-bottom:8px;">
       <span id="saveBtnContent">💾 &nbsp;저장 (시트 + 노션 + 로컬)</span>
@@ -258,116 +303,45 @@
 
 </div>
 
-<!-- 기록 목록 -->
-<div class="page" id="tab-history">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-    <span style="font-size:14px;font-weight:500;">저장된 기록</span>
-    <span class="count-pill" id="totalCount">0건</span>
-  </div>
-  <div id="historyList"></div>
-</div>
-
-<!-- 온도 측정 -->
-<div class="page" id="tab-temperature">
-  <div class="card">
-    <div class="card-label">가망고객 온도 측정</div>
-    <div style="font-size:13px;color:var(--text3);margin-bottom:12px;line-height:1.7;">
-      고객과 나눈 문자·카카오·메모 내역을 붙여넣으세요.<br>AI가 관심도를 분석하고 다음 전략을 제안합니다.
-    </div>
-    <textarea id="tempInput" placeholder="예시:
-고객: 씰 가격이 어떻게 되나요?
-나: 씰RWD 기준 4,480만원이고 보조금 받으면 약 3,700만원입니다.
-고객: 아 생각보다 비싸네요
-나: 5년 무상보증에 충전 비용이 월 2만원대라 유지비가 매우 저렴합니다
-고객: 흠... 한번 생각해볼게요
-(3일 후) 나: 안녕하세요! 혹시 결정 하셨나요?
-고객: 아직 고민중이에요" style="min-height:160px;"></textarea>
-
-    <div style="margin-top:10px;display:flex;gap:8px;">
-      <select id="tempCarSelect" style="flex:1;height:44px;background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;padding:0 12px;outline:none;">
-        <option value="">차종 선택 (선택사항)</option>
-        <option>씰RWD</option><option>씰AWD</option><option>씨라이언7</option>
-        <option>아토3</option><option>돌핀</option><option>돌핀Active</option><option>한</option>
-      </select>
-      <button class="btn btn-primary" id="tempBtn" onclick="analyzeTemperature()" style="flex:2;">
-        <span id="tempBtnContent">🌡️ &nbsp;온도 측정</span>
-      </button>
-    </div>
-  </div>
-
-  <div id="tempResult" style="display:none;">
-    <div class="temp-result-box">
-      <div class="temp-score-row">
-        <div>
-          <div id="tempEmoji" style="font-size:32px;margin-bottom:4px;">🌡️</div>
-          <div id="tempLabelBig" class="temp-label-big"></div>
-          <div id="tempBadge" style="margin-top:6px;"></div>
-        </div>
-        <div style="text-align:right;">
-          <div id="tempScoreBig" class="temp-score-big"></div>
-          <div style="font-size:12px;color:var(--text3);margin-top:4px;">/ 100점</div>
-        </div>
-      </div>
-      <div class="temp-bar-wrap"><div id="tempBarFill" class="temp-bar-fill"></div></div>
-
-      <div class="temp-section">
-        <div class="temp-section-title">📍 분석 요약</div>
-        <div id="tempSummary" class="temp-text"></div>
-      </div>
-
-      <div class="temp-section">
-        <div class="temp-section-title">✅ 긍정 신호</div>
-        <div id="tempPositive" class="temp-text"></div>
-      </div>
-
-      <div class="temp-section">
-        <div class="temp-section-title">⚠️ 우려 신호</div>
-        <div id="tempNegative" class="temp-text"></div>
-      </div>
-
-      <div class="temp-section" style="margin-bottom:0;">
-        <div class="temp-section-title">🎯 추천 전략</div>
-        <div id="tempStrategy"></div>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:8px;margin-top:12px;">
-      <button class="btn btn-save" onclick="saveTempToRecord()" style="flex:1;font-size:13px;">💾 현재 기록에 온도 저장</button>
-      <button class="btn btn-outline" onclick="copyTempResult()" style="flex:1;font-size:13px;">📋 결과 복사</button>
-    </div>
-    <div id="tempSaveStatus" style="min-height:24px;margin-top:8px;"></div>
-  </div>
-
-  <!-- 기록에서 선택해서 분석 -->
-  <div class="card" style="margin-top:12px;">
-    <div class="card-label">저장된 기록으로 재분석</div>
-    <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">기존 고객 기록의 메모+관심사를 불러와 온도를 측정합니다</div>
-    <select id="tempRecordSelect" style="width:100%;height:44px;background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;padding:0 12px;outline:none;margin-bottom:10px;">
-      <option value="">고객 선택...</option>
-    </select>
-    <button class="btn btn-outline" onclick="loadRecordForTemp()" style="height:40px;font-size:13px;">불러오기</button>
-  </div>
-</div>
-
-<!-- 팔로업 리스트 -->
+<!-- ════════════════════════════════════
+     팔로업 탭
+════════════════════════════════════ -->
 <div class="page" id="tab-followup">
+
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-    <span style="font-size:14px;font-weight:500;">오늘의 팔로업</span>
+    <span style="font-size:14px;font-weight:500;">팔로업 관리</span>
     <button onclick="renderFollowup()" style="background:transparent;border:none;color:var(--text3);font-size:13px;cursor:pointer;">↺ 새로고침</button>
   </div>
-  <div style="font-size:12px;color:var(--text3);margin-bottom:14px;">마지막 상담 기준 연락이 필요한 고객 목록</div>
+  <div style="font-size:12px;color:var(--text3);margin-bottom:14px;">마지막 상담 기준 경과일 · 탭하여 팔로업 입력</div>
 
-  <div style="display:flex;gap:6px;margin-bottom:14px;" id="followupFilterRow">
-    <button class="mode-btn active" id="ff-all"    onclick="setFollowupFilter('all')">전체</button>
-    <button class="mode-btn"        id="ff-urgent" onclick="setFollowupFilter('urgent')">🔴 긴급</button>
-    <button class="mode-btn"        id="ff-soon"   onclick="setFollowupFilter('soon')">🟡 예정</button>
-    <button class="mode-btn"        id="ff-ok"     onclick="setFollowupFilter('ok')">🟢 양호</button>
+  <div class="filter-row" id="followupFilterRow">
+    <button class="filter-btn active" id="ff-all"    onclick="setFollowupFilter('all')">전체</button>
+    <button class="filter-btn"        id="ff-urgent" onclick="setFollowupFilter('urgent')">🔴 7일+</button>
+    <button class="filter-btn"        id="ff-soon"   onclick="setFollowupFilter('soon')">🟡 3~6일</button>
+    <button class="filter-btn"        id="ff-ok"     onclick="setFollowupFilter('ok')">🟢 ~2일</button>
   </div>
 
   <div id="followupList"></div>
 </div>
 
-<!-- 설정 -->
+<!-- ════════════════════════════════════
+     고객목록 탭
+════════════════════════════════════ -->
+<div class="page" id="tab-history">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <span style="font-size:14px;font-weight:500;">저장된 고객</span>
+    <span class="count-pill" id="totalCount">0건</span>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="searchInput" placeholder="이름, 연락처, 차종 검색..." oninput="renderHistory()">
+  </div>
+  <div id="historyList"></div>
+</div>
+
+<!-- ════════════════════════════════════
+     설정 탭
+════════════════════════════════════ -->
 <div class="page" id="tab-settings">
   <div class="card">
     <div class="card-label">저장 연동</div>
@@ -376,7 +350,7 @@
       <input type="url" id="webhookUrl" placeholder="https://script.google.com/macros/s/..." oninput="saveSettings()">
       <div class="setting-desc">이 웹훅 하나로 구글 시트 + 노션에 동시 저장됩니다</div>
     </div>
-    <button class="btn btn-outline" onclick="testWebhook()" style="height:40px;font-size:13px;">연결 테스트</button>
+    <button class="btn btn-outline btn-sm" onclick="testWebhook()">연결 테스트</button>
     <div id="webhookTestStatus"></div>
   </div>
 
@@ -390,12 +364,22 @@
   </div>
 
   <div class="card">
+    <div class="card-label">차종 블로그 URL</div>
+    <div class="setting-desc" style="margin-bottom:12px;">상담 후 메시지 발송 시 첨부할 차종별 블로그 링크</div>
+    <div class="setting-row"><div class="setting-label">🐬 돌핀</div><input type="url" id="url-dolphin" placeholder="https://blog.naver.com/..." oninput="saveUrlSettings()"></div>
+    <div class="setting-row"><div class="setting-label">🚗 아토3</div><input type="url" id="url-atto3"   placeholder="https://blog.naver.com/..." oninput="saveUrlSettings()"></div>
+    <div class="setting-row"><div class="setting-label">⚡ 씰</div><input type="url" id="url-seal"     placeholder="https://blog.naver.com/..." oninput="saveUrlSettings()"></div>
+    <div class="setting-row"><div class="setting-label">🦁 씨라이언7</div><input type="url" id="url-sealion7" placeholder="https://blog.naver.com/..." oninput="saveUrlSettings()"></div>
+    <div class="setting-row" style="margin-bottom:0;"><div class="setting-label">🔋 LFP 배터리</div><input type="url" id="url-lfp" placeholder="https://blog.naver.com/..." oninput="saveUrlSettings()"></div>
+  </div>
+
+  <div class="card">
     <div class="card-label">저장 현황</div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <span style="font-size:14px;">로컬 기록</span>
       <span class="count-pill" id="settingsCount">0건</span>
     </div>
-    <button class="btn btn-outline" onclick="clearAll()" style="height:40px;font-size:13px;color:var(--red);border-color:rgba(224,90,90,0.3);">전체 기록 삭제</button>
+    <button class="btn btn-outline btn-sm" onclick="clearAll()" style="color:var(--red);border-color:rgba(224,90,90,0.3);">전체 기록 삭제</button>
   </div>
 
   <div class="card" style="border-color:rgba(232,213,163,0.2);">
@@ -406,31 +390,6 @@
       → 구글 시트 자동 저장 ✓<br>
       → 노션 BYD 고객 관리 DB 자동 저장 ✓<br>
       → 기기 로컬 저장 ✓
-    </div>
-  </div>
-
-  <div class="card" style="border-color:rgba(232,213,163,0.15);">
-    <div class="card-label">차종 블로그 URL 설정</div>
-    <div class="setting-desc" style="margin-bottom:12px;">상담 후 고객에게 보낼 차종별 블로그 링크를 저장해두세요</div>
-    <div class="setting-row">
-      <div class="setting-label">🐬 돌핀</div>
-      <input type="url" id="url-dolphin" placeholder="https://blog.naver.com/..." oninput="saveUrlSettings()">
-    </div>
-    <div class="setting-row">
-      <div class="setting-label">🚗 아토3</div>
-      <input type="url" id="url-atto3" placeholder="https://blog.naver.com/..." oninput="saveUrlSettings()">
-    </div>
-    <div class="setting-row">
-      <div class="setting-label">⚡ 씰</div>
-      <input type="url" id="url-seal" placeholder="https://blog.naver.com/..." oninput="saveUrlSettings()">
-    </div>
-    <div class="setting-row">
-      <div class="setting-label">🦁 씨라이언7</div>
-      <input type="url" id="url-sealion7" placeholder="https://blog.naver.com/..." oninput="saveUrlSettings()">
-    </div>
-    <div class="setting-row" style="margin-bottom:0;">
-      <div class="setting-label">🔋 LFP 배터리</div>
-      <input type="url" id="url-lfp" placeholder="https://blog.naver.com/..." oninput="saveUrlSettings()">
     </div>
   </div>
 
@@ -445,13 +404,17 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'byd_v4';
+const STORAGE_KEY = 'byd_v5';
 let currentMode = 'text';
 let imgBase64 = null, imgType = 'image/jpeg';
-let recognition = null, isRecording = false, voiceText = '';
+let fuImgBase64 = null, fuImgType = 'image/jpeg';
+let selectedWill = null;
+let selectedStatus = '신규';
+let followupFilter = 'all';
 
 const $ = id => document.getElementById(id);
 
+// ── 유틸 ──
 function today() {
   const n = new Date();
   return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
@@ -468,47 +431,6 @@ function saveSettings() {
   localStorage.setItem('byd_webhook', $('webhookUrl').value.trim());
   localStorage.setItem('byd_apikey',  $('apiKey').value.trim());
   updateConn();
-
-// ── PWA Service Worker 등록 ──
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(() => console.log('SW 등록 완료'))
-      .catch(e => console.log('SW 등록 실패:', e));
-  });
-}
-
-// ── 견적기에서 넘어온 파라미터 자동 입력 ──
-(function() {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('from') === 'quotation') {
-    const name  = params.get('name')  || '';
-    const car   = params.get('car')   || '';
-    const quote = params.get('quote') || '';
-
-    if (name || car || quote) {
-      // 결과 필드에 자동 입력
-      if (name)  document.getElementById('f-name').value = name;
-      if (car)   document.getElementById('f-car').value  = car;
-      if (quote) document.getElementById('f-memo').value = '견적: ' + quote;
-
-      // 오늘 날짜 자동 입력
-      document.getElementById('f-date').value = (function(){
-        const n = new Date();
-        return n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' + String(n.getDate()).padStart(2,'0');
-      })();
-
-      // 결과 섹션 바로 표시
-      document.getElementById('resultSection').style.display = 'block';
-
-      // 안내 토스트
-      setTimeout(() => {
-        document.getElementById('saveStatus').innerHTML =
-          '<span class="badge badge-info"><span class="dot"></span>견적기에서 데이터를 불러왔습니다. 나머지 정보를 입력 후 저장해주세요.</span>';
-      }, 300);
-    }
-  }
-})();
 }
 
 function updateConn() {
@@ -518,25 +440,25 @@ function updateConn() {
   $('connLabel').style.color = ok ? '#5aaa7a' : '';
 }
 
+// ── 탭 전환 ──
 function switchTab(tab) {
-  const tabs = ['input','history','temperature','followup','settings'];
+  const tabs = ['input','followup','history','settings'];
   document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', tabs[i]===tab));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   $('tab-'+tab).classList.add('active');
-  if (tab==='history')     renderHistory();
-  if (tab==='settings')    renderSettings();
-  if (tab==='temperature') renderTempRecordSelect();
-  if (tab==='followup')    renderFollowup();
+  if (tab==='history')  renderHistory();
+  if (tab==='settings') renderSettings();
+  if (tab==='followup') renderFollowup();
 }
 
+// ── 입력 모드 전환 ──
 function switchMode(m) {
   currentMode = m;
-  ['text','voice','photo','gallery'].forEach(k => {
+  ['text','photo','gallery'].forEach(k => {
     const el = $('mode'+k.charAt(0).toUpperCase()+k.slice(1));
     if (el) el.classList.toggle('active', k===m);
   });
-  $('textCard').style.display  = m==='text'  ? 'block':'none';
-  $('voiceCard').style.display = m==='voice' ? 'block':'none';
+  $('textCard').style.display  = m==='text' ? 'block':'none';
   $('photoCard').style.display = (m==='photo'||m==='gallery') ? 'block':'none';
   if (m==='photo') {
     $('photoCardLabel').textContent='고객 카드 / 대화 캡처 촬영';
@@ -547,62 +469,30 @@ function switchMode(m) {
   }
 }
 
-// ── 음성 ──
-function toggleVoice() {
-  if (!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)) {
-    alert('크롬 브라우저에서만 음성인식이 가능합니다.'); return;
-  }
-  isRecording ? stopVoice() : startVoice();
+// ── 출고 의지 선택 ──
+function selectWill(v) {
+  selectedWill = v;
+  document.querySelectorAll('.will-btn').forEach(btn => {
+    btn.className = 'will-btn';
+    if (parseInt(btn.dataset.v) === v) btn.classList.add('active-'+v);
+  });
 }
 
-function startVoice() {
-  const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
-  recognition = new SR();
-  recognition.lang='ko-KR'; recognition.continuous=true; recognition.interimResults=true;
-  voiceText='';
-  recognition.onstart = () => {
-    isRecording=true;
-    $('voiceCircle').classList.add('recording');
-    $('voiceCircle').textContent='⏹';
-    $('voiceStatus').textContent='녹음 중... (탭하여 중지)';
-    $('voiceStatus').style.color='var(--red)';
-  };
-  recognition.onresult = e => {
-    // 최종 확정 텍스트만 누적 (반복 버그 방지)
-    let newFinal='', interim='';
-    for (let i=e.resultIndex;i<e.results.length;i++) {
-      if (e.results[i].isFinal) newFinal+=e.results[i][0].transcript;
-      else interim+=e.results[i][0].transcript;
-    }
-    if (newFinal) voiceText+=newFinal;
-    const display=voiceText+(interim?' '+interim:'');
-    $('transcriptText').textContent=display;
-    $('voiceTranscript').style.display='block';
-    if (voiceText.trim()) {
-      $('analyzeVoiceBtn').disabled=false;
-      $('btnVoiceContent').innerHTML='✦ &nbsp;AI로 자동 정리';
-    }
-  };
-  recognition.onerror = () => stopVoice();
-  recognition.onend   = () => { if (isRecording) stopVoice(); };
-  recognition.start();
+// ── 고객 상태 선택 ──
+function selectStatus(v) {
+  selectedStatus = v;
+  document.querySelectorAll('.status-btn').forEach(btn => {
+    btn.className = 'status-btn';
+    if (btn.dataset.v === v) btn.classList.add('sel-'+v);
+  });
 }
 
-function stopVoice() {
-  isRecording=false;
-  if (recognition) recognition.stop();
-  $('voiceCircle').classList.remove('recording');
-  $('voiceCircle').textContent='🎤';
-  $('voiceStatus').textContent='녹음 완료. 아래 버튼으로 정리하세요.';
-  $('voiceStatus').style.color='var(--green)';
-}
-
-async function analyzeVoice() {
-  const txt=$('transcriptText').textContent.trim();
-  if (!txt) { alert('음성 내용이 없습니다'); return; }
-  $('rawInput').value=txt;
-  switchMode('text');
-  await analyzeText();
+// ── 기본값 초기화 ──
+function resetWillStatus() {
+  selectedWill = null;
+  selectedStatus = '신규';
+  document.querySelectorAll('.will-btn').forEach(b => b.className='will-btn');
+  selectStatus('신규');
 }
 
 // ── 사진 ──
@@ -656,13 +546,7 @@ function jsonPrompt() {
   "interest":"주요 관심사 요약(1-2줄)",
   "next":"다음 액션(없으면 추후 연락)",
   "region":"거주지(시/구/동 수준으로 추출, 없으면 빈문자열)",
-  "memo":"기타 메모(없으면 빈문자열)",
-  "temperature": 0에서 100 사이 정수 또는 null,
-  "tempLevel": "hot" 또는 "warm" 또는 "cold" 또는 null,
-  "tempLabel": "온도 한 줄 요약 또는 빈문자열",
-  "tempPositive": "긍정 신호들 줄바꿈 나열 또는 빈문자열",
-  "tempNegative": "우려 신호들 줄바꿈 나열 또는 빈문자열",
-  "tempStrategies": ["전략1","전략2","전략3"]
+  "memo":"기타 메모(없으면 빈문자열)"
 }
 
 [차종 매핑]
@@ -676,203 +560,120 @@ function jsonPrompt() {
 한/han → 한`;
 }
 
+// ── 텍스트 분석 ──
 async function analyzeText() {
-  const raw=$("rawInput").value.trim();
-  if (!raw) { alert("상담 내용을 입력해주세요"); return; }
-  const btn=$("analyzeBtn"); btn.disabled=true;
-  $("btnContent").innerHTML='<span class="spinner spinner-light"></span>&nbsp; AI 분석 중...';
+  const raw=$('rawInput').value.trim();
+  if (!raw) { alert('상담 내용을 입력해주세요'); return; }
+  const btn=$('analyzeBtn'); btn.disabled=true;
+  $('btnContent').innerHTML='<span class="spinner spinner-light"></span>&nbsp; AI 분석 중...';
   try {
     const prompt = [
-      "당신은 BYD 전기차 전문 영업 어시스턴트입니다. 아래 고객 상담 내용에서 정보를 추출하고 구매 관심도(온도)도 함께 분석해주세요.",
-      "",
-      "[정보 추출 규칙]",
-      "1. 고객명: 고객이 직접 이름을 말한 경우만 추출",
-      "2. 연락처: 010-XXXX-XXXX 형식 추출",
-      "3. 관심차종: 언급된 BYD 차종 (차종 매핑 적용)",
-      "4. 컨택유형: 카카오/문자/전화/방문/SNS 중 해당",
-      "5. 다음액션: 합의된 약속을 구체적으로 추출",
-      "6. 주요관심사: 시승/가격/충전/보조금 등",
-      "7. 메모: 거주지, 특이사항",
-      "",
-      "[온도 분석 기준 0~100점]",
-      "구매 의지 신호(+점수):",
-      "- 고객이 먼저 연락 (+20)",
-      "- 구체적 방문 날짜/시간 확정 (+25)",
-      "- 이름을 자발적으로 밝힘 (+10)",
-      "- 시승 적극 요청 (+15)",
-      "- 가격/보조금/금융 구체적 질문 (+10)",
-      "- 빠른 답장, 이모지, 친근한 말투 (+10)",
-      "- 차종을 직접 언급 (+10)",
-      "우려 신호(-점수):",
-      "- 생각해볼게요/나중에/모르겠어요 (-20)",
-      "- 짧은 단답, 무관심한 반응 (-15)",
-      "- 가격에만 집중, 부정적 반응 (-10)",
-      "",
-      "입력 내용:",
+      '당신은 BYD 전기차 전문 영업 어시스턴트입니다. 아래 고객 상담 내용에서 정보를 추출해주세요.',
+      '',
+      '[정보 추출 규칙]',
+      '1. 고객명: 고객이 직접 이름을 말한 경우만 추출',
+      '2. 연락처: 010-XXXX-XXXX 형식 추출',
+      '3. 관심차종: 언급된 BYD 차종 (차종 매핑 적용)',
+      '4. 컨택유형: 카카오/문자/전화/방문/SNS 중 해당',
+      '5. 다음액션: 합의된 약속을 구체적으로 추출',
+      '6. 주요관심사: 시승/가격/충전/보조금 등',
+      '7. 메모: 거주지, 특이사항',
+      '',
+      '입력 내용:',
       JSON.stringify(raw),
-      "",
+      '',
       jsonPrompt()
-    ].join("\n");
-    const d=await claude([{role:"user",content:prompt}]);
+    ].join('\n');
+    const d=await claude([{role:'user',content:prompt}]);
     if (d) fillResult(d);
-  } catch(e){alert("분석 실패: "+e.message);}
-  finally{btn.disabled=false;$("btnContent").innerHTML="✦ &nbsp;AI로 자동 정리";}
+  } catch(e){alert('분석 실패: '+e.message);}
+  finally{btn.disabled=false;$('btnContent').innerHTML='✦ &nbsp;AI로 자동 정리';}
 }
 
+// ── 사진 분석 ──
 async function analyzePhoto() {
-  if (!imgBase64){alert("사진을 먼저 선택해주세요");return;}
-  const btn=$("analyzePhotoBtn"); btn.disabled=true;
-  $("btnPhotoContent").innerHTML='<span class="spinner spinner-light"></span>&nbsp; 사진 분석 중...';
+  if (!imgBase64){alert('사진을 먼저 선택해주세요');return;}
+  const btn=$('analyzePhotoBtn'); btn.disabled=true;
+  $('btnPhotoContent').innerHTML='<span class="spinner spinner-light"></span>&nbsp; 사진 분석 중...';
   const photoPromptText = [
-    "당신은 BYD 전기차 전문 영업 어시스턴트입니다.",
-    "이 이미지에서 고객 정보를 빠짐없이 추출하고 구매 관심도(온도)도 함께 분석해주세요.",
-    "이미지는 카카오톡/문자 대화 캡처, 스마트폰 연락처 화면, 또는 고객 정보 카드일 수 있습니다.",
-    "",
-    "=== 이미지 유형별 처리 ===",
-    "",
-    "[A. 스마트폰 연락처 화면인 경우 - 최우선 적용]",
-    "연락처 화면은 상단에 연락처명(이름), 하단에 전화번호, 메모가 표시됩니다.",
-    "",
-    "1. 연락처명 파싱 규칙 (예: '260320 홍병국 고객님 아토3 돌핀A ㄷㄷㅁ ㄴㅂ')",
-    "   - 맨 앞 6자리 숫자 = 날짜 (YYMMDD → YYYY-MM-DD 변환)",
-    "   - 그 다음 한글 이름 = 고객명 (고객님 제외)",
-    "   - 차종명 = 관심차종 (BYD 차종 매핑 적용)",
-    "   - 한글 자음 약어 = 컨택/방문 정보 (아래 약어표 참고)",
-    "",
-    "2. 한글 자음 약어표 (반드시 이 표로 해석):",
-    "   ㄷㄷㅁ = 동대문전시장 컨택",
-    "   ㅅㅊ   = 서초전시장 컨택",
-    "   ㄴㅂ   = 내방",
-    "   ㅈㅎ   = 전화 컨택",
-    "   약어가 여러 개면 순서대로 해석 (예: ㄷㄷㅁ ㄴㅂ = 동대문전시장 컨택 후 내방)",
-    "",
-    "3. 전화번호: 화면 하단 휴대전화 번호 추출",
-    "",
-    "4. 메모란: 화면 하단 메모 텍스트 전체를 memo 필드에 그대로 입력",
-    "   메모 예시: '레이타시는/ 학교 행정실/ 260328 동대문 돌핀 계약/ 출고때 레이매각예정/삼성카드 일시불 페이백'",
-    "   → 이런 메모에서 추가 정보(거주지, 직장, 계약일, 금융정보 등)도 추출",
-    "",
-    "[B. 카카오톡/문자 대화 캡처인 경우]",
-    "- 왼쪽 말풍선 = 고객 메시지 → 분석 대상",
-    "- 오른쪽 말풍선 = 영업사원(나) 메시지 → 맥락 파악용",
-    "- 화면 상단 숫자/이름 = 고객 연락처명 (A 규칙으로 파싱)",
-    "- 대화 내용에서 고객명, 거주지, 약속 등 추가 추출",
-    "",
-    "[C. 명함/고객카드인 경우]",
-    "- 모든 텍스트 정보 추출, 온도는 null 처리",
-    "",
-    "=== 온도 분석 (0~100점) ===",
-    "구매 의지 높음(+점수):",
-    "- 고객이 먼저 연락 (+20)",
-    "- 구체적 방문/계약 일정 확정 (+25)",
-    "- 차종 직접 특정 (+10)",
-    "- 금융/계약 관련 언급 (+15)",
-    "- 시승 요청 (+15)",
-    "- 이름 자발 공개 (+10)",
-    "- 호감 표현/빠른 답장 (+10)",
-    "우려 신호(-점수):",
-    "- 회피/관망 반응 (-20)",
-    "- 단답/무관심 (-15)",
-    "- 가격만 집착 (-10)",
-    "",
+    '당신은 BYD 전기차 전문 영업 어시스턴트입니다.',
+    '이 이미지에서 고객 정보를 빠짐없이 추출해주세요.',
+    '이미지는 카카오톡/문자 대화 캡처, 스마트폰 연락처 화면, 또는 고객 정보 카드일 수 있습니다.',
+    '',
+    '=== 이미지 유형별 처리 ===',
+    '',
+    '[A. 스마트폰 연락처 화면인 경우]',
+    '1. 연락처명 파싱 규칙 (예: \'260320 홍병국 고객님 아토3 돌핀A ㄷㄷㅁ ㄴㅂ\')',
+    '   - 맨 앞 6자리 숫자 = 날짜 (YYMMDD → YYYY-MM-DD 변환)',
+    '   - 그 다음 한글 이름 = 고객명 (고객님 제외)',
+    '   - 차종명 = 관심차종',
+    '   - 한글 자음 약어: ㄷㄷㅁ=동대문전시장, ㅅㅊ=서초전시장, ㄴㅂ=내방, ㅈㅎ=전화컨택',
+    '2. 전화번호: 화면 하단 휴대전화 번호 추출',
+    '3. 메모란: 전체 텍스트를 memo 필드에 입력',
+    '',
+    '[B. 카카오톡/문자 대화 캡처인 경우]',
+    '- 왼쪽 말풍선 = 고객 메시지 → 분석 대상',
+    '- 오른쪽 말풍선 = 영업사원(나) 메시지 → 맥락 파악용',
+    '',
+    '[C. 명함/고객카드인 경우]',
+    '- 모든 텍스트 정보 추출',
+    '',
     jsonPrompt()
-  ].join("\n");
+  ].join('\n');
   try {
-    const d=await claude([{role:"user",content:[
-      {type:"image",source:{type:"base64",media_type:imgType,data:imgBase64}},
-      {type:"text",text:photoPromptText}
+    const d=await claude([{role:'user',content:[
+      {type:'image',source:{type:'base64',media_type:imgType,data:imgBase64}},
+      {type:'text',text:photoPromptText}
     ]}]);
     if (d) fillResult(d);
-  } catch(e){alert("분석 실패: "+e.message);}
-  finally{btn.disabled=false;$("btnPhotoContent").innerHTML="✦ &nbsp;사진 분석하기";}
+  } catch(e){alert('분석 실패: '+e.message);}
+  finally{btn.disabled=false;$('btnPhotoContent').innerHTML='✦ &nbsp;사진 분석하기';}
 }
 
 function fillResult(d) {
-  const txt=(d.content||[]).map(i=>i.text||"").join("");
-  if (!txt) throw new Error("AI 응답 없음");
-  const p=JSON.parse(txt.replace(/```json|```/g,"").trim());
-  ["date","name","phone","car","contact","region","interest","next","memo"].forEach(k=>{
-    const el=$("f-"+k); if(el) el.value=p[k]||"";
+  const txt=(d.content||[]).map(i=>i.text||'').join('');
+  if (!txt) throw new Error('AI 응답 없음');
+  const p=JSON.parse(txt.replace(/```json|```/g,'').trim());
+  ['date','name','phone','car','contact','region','interest','next','memo'].forEach(k=>{
+    const el=$('f-'+k); if(el) el.value=p[k]||'';
   });
-  if (!p.date) $("f-date").value=today();
-
-  // 온도 인라인 표시
-  const tempWrap = document.getElementById("inlineTempResult");
-  if (p.temperature != null && tempWrap) {
-    lastTempData = {
-      score: p.temperature,
-      level: p.tempLevel || (p.temperature>=70?"hot":p.temperature>=40?"warm":"cold"),
-      label: p.tempLabel || "",
-      summary: p.interest || "",
-      positive: p.tempPositive || "",
-      negative: p.tempNegative || "",
-      strategies: p.tempStrategies || []
-    };
-    const lv = lastTempData.level;
-    const cfgs = {
-      hot:  {emoji:"🔥", color:"#e05a5a", cls:"temp-hot",  txt:"HIGH"},
-      warm: {emoji:"🌤️", color:"#e8a03a", cls:"temp-warm", txt:"MID"},
-      cold: {emoji:"❄️", color:"#5a8ae0", cls:"temp-cold", txt:"LOW"}
-    };
-    const c = cfgs[lv] || cfgs.warm;
-    const strats = (p.tempStrategies||[]).map((s,i)=>
-      '<div style="font-size:12px;color:var(--text2);padding:3px 0;">'+( i+1)+'. '+s+'</div>'
-    ).join("");
-    const stratHtml = strats ? '<div style="font-size:11px;color:var(--text3);margin-bottom:4px;margin-top:8px;">추천 전략</div>'+strats : "";
-    tempWrap.style.display = "block";
-    tempWrap.innerHTML =
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'+
-        '<div style="display:flex;align-items:center;gap:8px;">'+
-          '<span style="font-size:22px;">'+c.emoji+'</span>'+
-          '<div>'+
-            '<span class="'+c.cls+'" style="font-size:13px;">'+c.emoji+' '+c.txt+' · '+p.temperature+'점</span>'+
-            '<div style="font-size:12px;color:var(--text3);margin-top:3px;">'+( p.tempLabel||"")+'</div>'+
-          '</div>'+
-        '</div>'+
-        '<button onclick="showFullTempFromInline()" style="background:transparent;border:0.5px solid var(--border2);border-radius:6px;color:var(--accent);font-size:11px;padding:5px 10px;cursor:pointer;font-family:inherit;">상세보기</button>'+
-      '</div>'+
-      '<div style="height:5px;background:var(--surface);border-radius:3px;overflow:hidden;margin-bottom:6px;">'+
-        '<div style="height:100%;width:'+p.temperature+'%;background:'+c.color+';border-radius:3px;"></div>'+
-      '</div>'+
-      stratHtml;
-  } else if (tempWrap) {
-    tempWrap.style.display = "none";
-  }
-
-  $("resultSection").style.display="block";
-  $("saveStatus").innerHTML="";
-  $("resultSection").scrollIntoView({behavior:"smooth",block:"start"});
-}
-
-function showFullTempFromInline() {
-  if (!lastTempData) return;
-  showTempResult(lastTempData);
-  switchTab("temperature");
+  if (!p.date) $('f-date').value=today();
+  resetWillStatus();
+  $('resultSection').style.display='block';
+  $('saveStatus').innerHTML='';
+  $('resultSection').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function fields() {
   return {
-    date:$('f-date').value, name:$('f-name').value, phone:$('f-phone').value,
-    car:$('f-car').value, contact:$('f-contact').value,
-    region:$('f-region') ? $('f-region').value : '',
-    interest:$('f-interest').value,
-    next:$('f-next').value, memo:$('f-memo').value,
-    temperature: null, tempLabel: '', tempLevel: '',
-    savedAt:new Date().toLocaleString('ko-KR')
+    date:     $('f-date').value,
+    name:     $('f-name').value,
+    phone:    $('f-phone').value,
+    car:      $('f-car').value,
+    contact:  $('f-contact').value,
+    region:   $('f-region') ? $('f-region').value : '',
+    interest: $('f-interest').value,
+    next:     $('f-next').value,
+    memo:     $('f-memo').value,
+    will:     selectedWill,
+    status:   selectedStatus || '신규',
+    savedAt:  new Date().toLocaleString('ko-KR'),
+    followups: []
   };
 }
 
+// ── 저장 ──
 async function saveRecord() {
   const record=fields();
   const btn=$('saveBtn'); btn.disabled=true;
   $('saveBtnContent').innerHTML='<span class="spinner spinner-light"></span>&nbsp; 저장 중...';
 
-  // 로컬 저장
+  // 로컬
   const list=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
-  list.unshift(record); if(list.length>200) list.pop();
+  list.unshift(record); if(list.length>300) list.pop();
   localStorage.setItem(STORAGE_KEY,JSON.stringify(list));
 
-  // 웹훅 (구글시트 + 노션)
+  // 웹훅
   const {webhook}=cfg();
   let msg='로컬 ✓';
   if (webhook) {
@@ -882,22 +683,656 @@ async function saveRecord() {
     } catch(e){ msg='로컬 ✓ · 전송 실패'; }
   } else { msg='로컬 ✓ · 웹훅 미설정'; }
 
-  const ok=msg.includes('노션 ✓')||msg.includes('로컬 ✓');
+  const ok=msg.includes('로컬 ✓');
   $('saveStatus').innerHTML=`<span class="badge ${ok?'badge-ok':'badge-info'}"><span class="dot"></span>${msg}</span>`;
 
   if (ok) {
     setTimeout(()=>{
       $('rawInput').value='';
-      $('transcriptText').textContent='';
-      $('voiceTranscript').style.display='none';
-      voiceText='';
       clearPhoto();
       $('resultSection').style.display='none';
       $('saveStatus').innerHTML='';
+      resetWillStatus();
     },2200);
   }
   btn.disabled=false;
   $('saveBtnContent').textContent='💾 저장 (시트 + 노션 + 로컬)';
+}
+
+// ── URL 설정 ──
+function saveUrlSettings() {
+  ['dolphin','atto3','seal','sealion7','lfp'].forEach(k => {
+    const el = $('url-'+k);
+    if (el) localStorage.setItem('byd_url_'+k, el.value.trim());
+  });
+}
+function loadUrlSettings() {
+  ['dolphin','atto3','seal','sealion7','lfp'].forEach(k => {
+    const el = $('url-'+k);
+    if (el) el.value = localStorage.getItem('byd_url_'+k) || '';
+  });
+}
+function getCarUrl(car) {
+  const c=(car||'').toLowerCase();
+  if (c.includes('돌핀')||c.includes('dolphin')) return localStorage.getItem('byd_url_dolphin')||'';
+  if (c.includes('아토')||c.includes('atto'))    return localStorage.getItem('byd_url_atto3')||'';
+  if (c.includes('씨라')||c.includes('sealion')) return localStorage.getItem('byd_url_sealion7')||'';
+  if (c.includes('씰')||c.includes('seal'))      return localStorage.getItem('byd_url_seal')||'';
+  return '';
+}
+
+// ── 메시지 팝업 ──
+function showMessagePopup(nameOverride, carOverride) {
+  const name   = nameOverride || $('f-name').value.trim() || '고객';
+  const car    = carOverride  || $('f-car').value.trim() || '';
+  const date   = ($('f-date').value||today()).replace(/-/g,'').slice(2);
+  const carUrl = getCarUrl(car);
+  const lfpUrl = localStorage.getItem('byd_url_lfp')||'';
+
+  const existing = $('msgPopup');
+  if (existing) existing.remove();
+
+  const defaultMsg = buildMessage(name, car, date, carUrl, lfpUrl);
+
+  const popup = document.createElement('div');
+  popup.id = 'msgPopup';
+  popup.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;';
+  popup.innerHTML = `
+    <div style="background:#141414;border:0.5px solid rgba(255,255,255,0.15);border-radius:14px;padding:20px;width:100%;max-width:480px;margin-top:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-size:15px;font-weight:500;color:#f0f0f0;">💬 상담 후 메시지</div>
+        <button onclick="document.getElementById('msgPopup').remove()" style="background:transparent;border:none;color:#555;font-size:18px;cursor:pointer;">✕</button>
+      </div>
+      <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">차종 블로그 URL</div>
+      <input id="msg-car-url" type="url" value="${carUrl}" placeholder="차종 블로그 URL" style="width:100%;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:13px;padding:10px;outline:none;font-family:inherit;margin-bottom:10px;" oninput="updateMsgPreview('${name}','${car}','${date}')">
+      <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">LFP 배터리 블로그 URL</div>
+      <input id="msg-lfp-url" type="url" value="${lfpUrl}" placeholder="LFP 블로그 URL" style="width:100%;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:13px;padding:10px;outline:none;font-family:inherit;margin-bottom:14px;" oninput="updateMsgPreview('${name}','${car}','${date}')">
+      <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">발송 메시지 <span style="color:rgba(232,213,163,0.5);">(직접 수정 가능)</span></div>
+      <textarea id="msg-text" style="width:100%;height:220px;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:13px;padding:12px;outline:none;font-family:inherit;resize:none;line-height:1.8;">${defaultMsg}</textarea>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button onclick="copyMessage()" style="flex:1;height:48px;background:#e8d5a3;color:#1a1200;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">📋 복사</button>
+        <button onclick="updateMsgPreview('${name}','${car}','${date}')" style="width:48px;height:48px;background:var(--surface2);color:var(--text2);border:0.5px solid var(--border2);border-radius:8px;font-size:18px;cursor:pointer;">↺</button>
+      </div>
+      <div id="msg-copy-status" style="min-height:24px;margin-top:8px;text-align:center;font-size:12px;"></div>
+    </div>`;
+  document.body.appendChild(popup);
+  if (!carUrl) {
+    $('msg-copy-status').innerHTML='<span style="color:#e8a03a;">⚠ 설정 탭에서 차종 블로그 URL을 먼저 등록해주세요</span>';
+  }
+}
+
+function buildMessage(name, car, date, carUrl, lfpUrl) {
+  const carLine = carUrl ? `\n\n📌 ${car} 관련 자료\n${carUrl}` : '';
+  const lfpLine = lfpUrl ? `\n\n🔋 BYD LFP 배터리 정보\n${lfpUrl}` : '';
+  return `안녕하십니까 ${name} 고객님! 😊\n\n오늘 BYD 서초전시장에서 상담 도와드린 남광희 대리입니다.\n\n바쁘신 가운데 방문해 주셔서 진심으로 감사드립니다.\n오늘 상담해 드렸던 ${car} 관련 자료를 보내드리니 편하실 때 참고해 보시고, 추가로 궁금하신 사항이 있으시면 언제든지 편한 시간에 연락 주시면 성심껏 도와드리겠습니다!${carLine}${lfpLine}\n\n📞 남광희 대리\nBYD 서초전시장\n010-2055-3180`;
+}
+
+function updateMsgPreview(name, car, date) {
+  const carUrl = $('msg-car-url').value.trim();
+  const lfpUrl = $('msg-lfp-url').value.trim();
+  $('msg-text').value = buildMessage(name||'고객', car||'', date||'', carUrl, lfpUrl);
+}
+
+async function copyMessage() {
+  const text = $('msg-text').value;
+  const status = $('msg-copy-status');
+  try {
+    await navigator.clipboard.writeText(text);
+    status.innerHTML = '<span style="color:#5aaa7a;">✓ 복사됐습니다! 카톡/문자에 붙여넣기 하세요</span>';
+    setTimeout(()=>{ status.innerHTML=''; $('msgPopup').remove(); }, 2000);
+  } catch(e) {
+    $('msg-text').select();
+    status.innerHTML = '<span style="color:#e8a03a;">텍스트를 선택했습니다. 직접 복사해주세요</span>';
+  }
+}
+
+// ── 연락처 저장 (vCard) ──
+function saveContact() {
+  const name  = $('f-name').value.trim();
+  const phone = $('f-phone').value.trim();
+  const car   = $('f-car').value.trim();
+  const date  = ($('f-date').value||today()).replace(/-/g,'').slice(2);
+  const interest = $('f-interest').value.trim();
+  const next  = $('f-next').value.trim();
+  const memo  = $('f-memo').value.trim();
+  if (!phone) { alert('연락처를 먼저 입력해주세요'); return; }
+  showVCardPopup({ name, phone, car, date, interest, next, memo });
+}
+
+function showVCardPopup(data) {
+  const existing = $('vcardPopup');
+  if (existing) existing.remove();
+  const defaultContactName = [data.date, data.name ? data.name+' 고객님' : '', data.car].filter(Boolean).join(' ');
+  const defaultMemo = [data.date+' 상담', data.interest, data.next ? '다음: '+data.next : ''].filter(Boolean).join(' / ');
+  const popup = document.createElement('div');
+  popup.id = 'vcardPopup';
+  popup.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+  popup.innerHTML = `
+    <div style="background:#141414;border:0.5px solid rgba(255,255,255,0.15);border-radius:14px;padding:20px;width:100%;max-width:420px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-size:15px;font-weight:500;color:#f0f0f0;">📱 연락처 저장</div>
+        <button onclick="document.getElementById('vcardPopup').remove()" style="background:transparent;border:none;color:#555;font-size:18px;cursor:pointer;">✕</button>
+      </div>
+      <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">연락처명</div>
+      <input id="vc-name" type="text" value="${defaultContactName}" style="width:100%;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:14px;font-weight:500;padding:10px;outline:none;font-family:inherit;margin-bottom:12px;">
+      <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">전화번호</div>
+      <input id="vc-phone" type="tel" value="${data.phone}" style="width:100%;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:14px;font-weight:500;padding:10px;outline:none;font-family:inherit;margin-bottom:12px;">
+      <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">연락처 메모</div>
+      <textarea id="vc-memo" style="width:100%;height:80px;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:13px;padding:10px;outline:none;font-family:inherit;resize:none;line-height:1.6;">${defaultMemo}</textarea>
+      <button onclick="downloadVCard()" style="width:100%;height:48px;background:#e8d5a3;color:#1a1200;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:12px;">📥 연락처 저장</button>
+    </div>`;
+  document.body.appendChild(popup);
+}
+
+function downloadVCard() {
+  const name  = $('vc-name').value.trim();
+  const phone = $('vc-phone').value.trim().replace(/-/g,'');
+  const memo  = $('vc-memo').value.trim();
+  if (!name || !phone) { alert('이름과 전화번호를 입력해주세요'); return; }
+  const vcard = ['BEGIN:VCARD','VERSION:3.0','FN:'+name,'N:'+name+';;;;','TEL;TYPE=CELL:'+phone,memo?'NOTE:'+memo.replace(/\n/g,'\\n'):'','END:VCARD'].filter(Boolean).join('\r\n');
+  const blob = new Blob([vcard], {type:'text/vcard;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=name+'.vcf'; a.click();
+  URL.revokeObjectURL(url);
+  setTimeout(()=>{ $('vcardPopup').remove(); }, 500);
+}
+
+// ── 고객 목록 렌더 ──
+function getRecords(){return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');}
+
+function willBadgeHtml(will) {
+  if (will === null || will === undefined) return '';
+  return `<span class="will-badge will-${will}">${will}%</span>`;
+}
+
+function statusBadgeHtml(status) {
+  if (!status) return '';
+  return `<span class="status-badge st-${status}">${status}</span>`;
+}
+
+function renderHistory() {
+  const list = getRecords();
+  $('totalCount').textContent = list.length+'건';
+  const el = $('historyList');
+  const query = ($('searchInput')||{value:''}).value.toLowerCase().trim();
+  const filtered = query
+    ? list.filter(r => (r.name||'').includes(query)||(r.phone||'').includes(query)||(r.car||'').toLowerCase().includes(query))
+    : list;
+  if (!filtered.length) { el.innerHTML='<div class="empty-state">저장된 기록이 없습니다</div>'; return; }
+  el.innerHTML = filtered.map((r,i) => {
+    const origIdx = list.indexOf(r);
+    return `
+    <div class="record-item" style="position:relative;">
+      <div onclick="loadRecordForEdit(${origIdx})" style="padding-right:40px;cursor:pointer;">
+        <div class="record-top">
+          <span class="record-name">${r.name||'미상'}</span>
+          <span class="record-car">${r.car||'미정'}</span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;margin-top:3px;flex-wrap:wrap;">
+          ${statusBadgeHtml(r.status)}
+          ${willBadgeHtml(r.will)}
+        </div>
+        <div class="record-meta" style="margin-top:4px;">${r.date||''} · ${r.phone||''} · ${r.contact||'-'}</div>
+        <div class="record-next">→ ${r.next||'-'}</div>
+        ${r.followups&&r.followups.length ? `<div style="font-size:11px;color:var(--text3);margin-top:3px;">팔로업 ${r.followups.length}회</div>` : ''}
+      </div>
+      <button onclick="deleteRecord(${origIdx},event)" style="position:absolute;top:50%;right:10px;transform:translateY(-50%);background:transparent;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:6px;line-height:1;">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function deleteRecord(i, e) {
+  e.stopPropagation();
+  const list = getRecords();
+  const r = list[i];
+  if (!confirm('"'+(r.name||'미상')+'" 기록을 삭제할까요?')) return;
+  list.splice(i,1);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  renderHistory();
+}
+
+// 고객 수정 팝업
+function loadRecordForEdit(i) {
+  const list = getRecords();
+  const r = list[i];
+  showEditPopup(r, i);
+}
+
+function showEditPopup(r, idx) {
+  const existing = $('editPopup');
+  if (existing) existing.remove();
+
+  const fuHtml = (r.followups||[]).map((f,fi) => `
+    <div class="history-block">
+      <div class="history-date">${f.date||''} · ${f.contact||''}</div>
+      <div class="history-text">${f.memo||''}</div>
+      ${f.will!==null&&f.will!==undefined ? `<span class="will-badge will-${f.will}" style="margin-top:4px;display:inline-flex;">${f.will}%</span>` : ''}
+      ${f.status ? `<span class="status-badge st-${f.status}" style="margin-top:4px;margin-left:4px;display:inline-flex;">${f.status}</span>` : ''}
+    </div>`).join('');
+
+  const popup = document.createElement('div');
+  popup.id = 'editPopup';
+  popup.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;overflow-y:auto;padding:16px;';
+
+  popup.innerHTML = `
+    <div style="background:#141414;border:0.5px solid rgba(255,255,255,0.15);border-radius:14px;padding:20px;width:100%;max-width:480px;margin:0 auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-size:15px;font-weight:500;color:#f0f0f0;">${r.name||'미상'} 고객</div>
+        <button onclick="document.getElementById('editPopup').remove()" style="background:transparent;border:none;color:#555;font-size:18px;cursor:pointer;">✕</button>
+      </div>
+
+      <!-- 기본 정보 -->
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:0.06em;">기본 정보</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+        ${['date:날짜','name:고객명','phone:연락처','car:관심차종','contact:컨택유형','region:거주지','interest:주요관심사','next:다음액션','memo:메모'].map(kl=>{
+          const [k,l]=kl.split(':');
+          return `<div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:11px;color:var(--text3);min-width:68px;font-family:'DM Mono',monospace;">${l}</span>
+            <input id="edit-${k}" type="text" value="${(r[k]||'').replace(/"/g,'&quot;')}" style="flex:1;background:#1c1c1c;border:none;border-bottom:0.5px solid rgba(255,255,255,0.1);color:#f0f0f0;font-family:'Noto Sans KR',sans-serif;font-size:14px;padding:6px 0;outline:none;">
+          </div>`;
+        }).join('')}
+      </div>
+
+      <!-- 출고 의지 -->
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:0.06em;">출고 의지</div>
+      <div class="will-group" id="editWillGroup" style="margin-bottom:14px;">
+        ${[0,30,50,80,100].map(v=>`<button class="will-btn${r.will===v?' active-'+v:''}" data-v="${v}" onclick="selectEditWill(${v})">${v}%</button>`).join('')}
+      </div>
+
+      <!-- 고객 상태 -->
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:0.06em;">고객 상태</div>
+      <div class="status-group" id="editStatusGroup" style="margin-bottom:14px;">
+        ${['신규','진행중','계약','출고완료','이탈'].map(v=>`<button class="status-btn${r.status===v?' sel-'+v:''}" data-v="${v}" onclick="selectEditStatus('${v}')">${v}</button>`).join('')}
+      </div>
+
+      <!-- 팔로업 이력 -->
+      ${fuHtml ? `<div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:0.06em;">팔로업 이력 (${(r.followups||[]).length}회)</div>${fuHtml}<div style="height:14px;"></div>` : ''}
+
+      <!-- 저장 버튼 -->
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button onclick="saveEditRecord(${idx})" style="flex:2;height:48px;background:#1a2a1a;color:#5aaa7a;border:0.5px solid rgba(90,170,122,0.3);border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;">💾 수정 저장</button>
+        <button onclick="showMessagePopup('${(r.name||'').replace(/'/g,"\\'")}','${(r.car||'').replace(/'/g,"\\'")}');document.getElementById('editPopup').remove();" style="flex:1;height:48px;background:transparent;color:#e8d5a3;border:0.5px solid rgba(232,213,163,0.3);border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;">💬 메시지</button>
+      </div>
+      <div id="editSaveStatus" style="min-height:24px;margin-top:8px;"></div>
+    </div>`;
+
+  document.body.appendChild(popup);
+
+  // 현재 수정 중인 레코드의 will/status 저장
+  window._editWill = r.will !== undefined ? r.will : null;
+  window._editStatus = r.status || '신규';
+}
+
+let _editWill = null;
+let _editStatus = '신규';
+
+function selectEditWill(v) {
+  window._editWill = v;
+  document.querySelectorAll('#editWillGroup .will-btn').forEach(btn => {
+    btn.className = 'will-btn';
+    if (parseInt(btn.dataset.v) === v) btn.classList.add('active-'+v);
+  });
+}
+
+function selectEditStatus(v) {
+  window._editStatus = v;
+  document.querySelectorAll('#editStatusGroup .status-btn').forEach(btn => {
+    btn.className = 'status-btn';
+    if (btn.dataset.v === v) btn.classList.add('sel-'+v);
+  });
+}
+
+async function saveEditRecord(idx) {
+  const list = getRecords();
+  const r = list[idx];
+  const fields = ['date','name','phone','car','contact','region','interest','next','memo'];
+  fields.forEach(k => {
+    const el = $('edit-'+k);
+    if (el) r[k] = el.value;
+  });
+  r.will   = window._editWill;
+  r.status = window._editStatus || '신규';
+
+  list[idx] = r;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+
+  // 웹훅 동기화
+  const {webhook} = cfg();
+  if (webhook) {
+    try {
+      await fetch(webhook,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({...r, action:'update_record'})});
+    } catch(e){}
+  }
+
+  $('editSaveStatus').innerHTML = '<span class="badge badge-ok"><span class="dot"></span>저장 완료 ✓</span>';
+  setTimeout(()=>{
+    $('editPopup').remove();
+    renderHistory();
+  }, 1200);
+}
+
+// ── 팔로업 ──
+function daysSince(dateStr) {
+  if (!dateStr) return 999;
+  const d = new Date(dateStr);
+  if (isNaN(d)) return 999;
+  return Math.floor((Date.now()-d.getTime())/86400000);
+}
+
+function getLastDate(r) {
+  // 팔로업이 있으면 마지막 팔로업 날짜, 없으면 최초 저장 날짜
+  if (r.followups && r.followups.length > 0) {
+    return r.followups[r.followups.length-1].date || r.date;
+  }
+  return r.date;
+}
+
+function setFollowupFilter(f) {
+  followupFilter = f;
+  ['all','urgent','soon','ok'].forEach(k => {
+    $('ff-'+k).classList.toggle('active', k===f);
+  });
+  renderFollowup();
+}
+
+function renderFollowup() {
+  const list = getRecords();
+  const el = $('followupList');
+  // 이탈 고객 제외
+  const enriched = list
+    .map((r,i) => ({...r, idx:i, days:daysSince(getLastDate(r))}))
+    .filter(r => r.status !== '이탈' && r.status !== '출고완료')
+    .sort((a,b) => b.days-a.days);
+
+  const filtered = enriched.filter(r => {
+    if (followupFilter==='urgent') return r.days >= 7;
+    if (followupFilter==='soon')   return r.days >= 3 && r.days < 7;
+    if (followupFilter==='ok')     return r.days < 3;
+    return true;
+  });
+
+  if (!filtered.length) { el.innerHTML='<div class="empty-state">해당 조건의 고객이 없습니다</div>'; return; }
+
+  el.innerHTML = filtered.map(r => {
+    const d = r.days;
+    const cls = d>=7?'urgent':d>=3?'soon':'ok';
+    const lbl = d===0?'오늘':d>=999?'?':d+'일전';
+    return `
+    <div class="followup-item">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div class="followup-days ${cls}">${lbl}</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:500;">${r.name||'미상'} <span style="font-size:11px;color:var(--text3);font-family:monospace;">${r.car||''}</span></div>
+          <div style="font-size:12px;color:var(--text3);margin-top:1px;">${r.phone||''}</div>
+        </div>
+        <div style="display:flex;gap:4px;flex-direction:column;align-items:flex-end;">
+          ${statusBadgeHtml(r.status)}
+          ${willBadgeHtml(r.will)}
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px;">→ ${r.next||r.interest||'다음 액션 없음'}</div>
+      <button onclick="showFollowupInput(${r.idx})" style="width:100%;height:38px;background:rgba(232,213,163,0.08);border:0.5px solid rgba(232,213,163,0.25);border-radius:8px;color:#e8d5a3;font-size:13px;cursor:pointer;font-family:inherit;">✦ 팔로업 내용 입력</button>
+    </div>`;
+  }).join('');
+}
+
+// 팔로업 입력 팝업
+function showFollowupInput(idx) {
+  const list = getRecords();
+  const r = list[idx];
+  const existing = $('fuPopup');
+  if (existing) existing.remove();
+
+  const popup = document.createElement('div');
+  popup.id = 'fuPopup';
+  popup.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;overflow-y:auto;padding:16px;';
+
+  popup.innerHTML = `
+    <div style="background:#141414;border:0.5px solid rgba(255,255,255,0.15);border-radius:14px;padding:20px;width:100%;max-width:480px;margin:0 auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <div style="font-size:15px;font-weight:500;color:#f0f0f0;">📋 팔로업 — ${r.name||'미상'}</div>
+        <button onclick="document.getElementById('fuPopup').remove()" style="background:transparent;border:none;color:#555;font-size:18px;cursor:pointer;">✕</button>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:16px;">${r.car||''} · ${r.phone||''}</div>
+
+      <!-- 입력 모드 -->
+      <div style="display:flex;gap:6px;margin-bottom:12px;">
+        <button class="mode-btn active" id="fuModeText"    onclick="switchFuMode('text')">✏️ 텍스트</button>
+        <button class="mode-btn"        id="fuModePhoto"   onclick="switchFuMode('photo')">📷 카메라</button>
+        <button class="mode-btn"        id="fuModeGallery" onclick="switchFuMode('gallery')">🖼️ 갤러리</button>
+      </div>
+
+      <!-- 텍스트 -->
+      <div id="fuTextArea">
+        <textarea id="fuRawInput" placeholder="예: 오늘 전화통화. 이번주 토요일 시승 예약. 씰AWD 관심으로 바뀜.&#10;&#10;나눈 내용 자유롭게 입력 →" style="width:100%;min-height:120px;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:14px;padding:12px;outline:none;font-family:inherit;resize:none;line-height:1.7;"></textarea>
+        <button onclick="analyzeFuText(${idx})" id="fuAnalyzeBtn" style="width:100%;height:44px;background:#e8d5a3;color:#1a1200;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px;">
+          <span id="fuAnalyzeBtnContent">✦ &nbsp;AI로 정리</span>
+        </button>
+      </div>
+
+      <!-- 사진 -->
+      <div id="fuPhotoArea" style="display:none;">
+        <input type="file" id="fuCameraInput"  accept="image/*" capture="environment" style="display:none;" onchange="handleFuPhoto(this)">
+        <input type="file" id="fuGalleryInput" accept="image/*"                       style="display:none;" onchange="handleFuPhoto(this)">
+        <div id="fuPhotoPreview" style="display:none;margin-bottom:12px;">
+          <img id="fuPreviewImg" style="width:100%;border-radius:8px;border:0.5px solid rgba(255,255,255,0.08);">
+          <button onclick="clearFuPhoto()" style="background:transparent;border:none;color:#555;font-size:12px;cursor:pointer;margin-top:6px;">✕ 사진 제거</button>
+        </div>
+        <div id="fuPhotoPlaceholder">
+          <div onclick="triggerFuPhoto()" style="border:1.5px dashed rgba(255,255,255,0.15);border-radius:8px;padding:24px;text-align:center;cursor:pointer;">
+            <div style="font-size:28px;margin-bottom:6px;" id="fuPhotoIcon">📷</div>
+            <div style="font-size:13px;color:#888;" id="fuPhotoTitle">탭하여 촬영</div>
+          </div>
+        </div>
+        <button onclick="analyzeFuPhoto(${idx})" id="fuAnalyzePhotoBtn" disabled style="width:100%;height:44px;background:#e8d5a3;color:#1a1200;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px;opacity:0.5;">
+          <span id="fuAnalyzePhotoBtnContent">사진을 먼저 선택해주세요</span>
+        </button>
+      </div>
+
+      <!-- 정리된 결과 (AI 분석 후 표시) -->
+      <div id="fuResult" style="display:none;margin-top:14px;">
+        <div style="height:0.5px;background:rgba(255,255,255,0.08);margin-bottom:14px;"></div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px;letter-spacing:0.06em;">정리된 내용 (수정 가능)</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:11px;color:var(--text3);min-width:68px;font-family:'DM Mono',monospace;">날짜</span>
+            <input id="fu-date" type="text" style="flex:1;background:#1c1c1c;border:none;border-bottom:0.5px solid rgba(255,255,255,0.1);color:#f0f0f0;font-size:14px;padding:6px 0;outline:none;font-family:'Noto Sans KR',sans-serif;">
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:11px;color:var(--text3);min-width:68px;font-family:'DM Mono',monospace;">컨택유형</span>
+            <input id="fu-contact" type="text" style="flex:1;background:#1c1c1c;border:none;border-bottom:0.5px solid rgba(255,255,255,0.1);color:#f0f0f0;font-size:14px;padding:6px 0;outline:none;font-family:'Noto Sans KR',sans-serif;">
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:11px;color:var(--text3);min-width:68px;font-family:'DM Mono',monospace;">다음액션</span>
+            <input id="fu-next" type="text" style="flex:1;background:#1c1c1c;border:none;border-bottom:0.5px solid rgba(255,255,255,0.1);color:#f0f0f0;font-size:14px;padding:6px 0;outline:none;font-family:'Noto Sans KR',sans-serif;">
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;">
+            <span style="font-size:11px;color:var(--text3);min-width:68px;font-family:'DM Mono',monospace;padding-top:6px;">내용요약</span>
+            <textarea id="fu-memo" style="flex:1;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:6px;color:#f0f0f0;font-size:13px;padding:8px;outline:none;font-family:'Noto Sans KR',sans-serif;resize:none;min-height:70px;line-height:1.6;"></textarea>
+          </div>
+        </div>
+
+        <!-- 출고 의지 업데이트 -->
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:0.06em;">출고 의지 업데이트</div>
+        <div class="will-group" id="fuWillGroup" style="margin-bottom:14px;">
+          ${[0,30,50,80,100].map(v=>`<button class="will-btn${r.will===v?' active-'+v:''}" data-v="${v}" onclick="selectFuWill(${v})">${v}%</button>`).join('')}
+        </div>
+
+        <!-- 상태 업데이트 -->
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:0.06em;">고객 상태 업데이트</div>
+        <div class="status-group" id="fuStatusGroup" style="margin-bottom:16px;">
+          ${['신규','진행중','계약','출고완료','이탈'].map(v=>`<button class="status-btn${r.status===v?' sel-'+v:''}" data-v="${v}" onclick="selectFuStatus('${v}')">${v}</button>`).join('')}
+        </div>
+
+        <button onclick="saveFuRecord(${idx})" style="width:100%;height:48px;background:#1a2a1a;color:#5aaa7a;border:0.5px solid rgba(90,170,122,0.3);border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;">💾 팔로업 저장</button>
+        <div id="fuSaveStatus" style="min-height:24px;margin-top:8px;text-align:center;"></div>
+      </div>
+    </div>`;
+
+  document.body.appendChild(popup);
+  window._fuWill   = r.will !== undefined ? r.will : null;
+  window._fuStatus = r.status || '신규';
+  window._fuMode   = 'text';
+}
+
+function switchFuMode(m) {
+  window._fuMode = m;
+  ['text','photo','gallery'].forEach(k => {
+    const el = $('fuMode'+k.charAt(0).toUpperCase()+k.slice(1));
+    if (el) el.classList.toggle('active', k===m);
+  });
+  $('fuTextArea').style.display  = m==='text' ? 'block':'none';
+  $('fuPhotoArea').style.display = (m==='photo'||m==='gallery') ? 'block':'none';
+  if (m==='photo') {
+    $('fuPhotoIcon').textContent='📷'; $('fuPhotoTitle').textContent='탭하여 촬영';
+  } else if (m==='gallery') {
+    $('fuPhotoIcon').textContent='🖼️'; $('fuPhotoTitle').textContent='탭하여 사진 선택';
+  }
+}
+
+function triggerFuPhoto() {
+  window._fuMode==='photo' ? $('fuCameraInput').click() : $('fuGalleryInput').click();
+}
+function handleFuPhoto(input) {
+  const file=input.files[0]; if(!file) return;
+  fuImgType=file.type||'image/jpeg';
+  const r=new FileReader();
+  r.onload=e=>{
+    fuImgBase64=e.target.result.split(',')[1];
+    $('fuPreviewImg').src=e.target.result;
+    $('fuPhotoPreview').style.display='block';
+    $('fuPhotoPlaceholder').style.display='none';
+    $('fuAnalyzePhotoBtn').disabled=false;
+    $('fuAnalyzePhotoBtn').style.opacity='1';
+    $('fuAnalyzePhotoBtnContent').innerHTML='✦ &nbsp;사진 분석하기';
+  };
+  r.readAsDataURL(file); input.value='';
+}
+function clearFuPhoto() {
+  fuImgBase64=null;
+  $('fuPhotoPreview').style.display='none';
+  $('fuPhotoPlaceholder').style.display='block';
+  $('fuAnalyzePhotoBtn').disabled=true;
+  $('fuAnalyzePhotoBtn').style.opacity='0.5';
+  $('fuAnalyzePhotoBtnContent').textContent='사진을 먼저 선택해주세요';
+}
+
+function fuJsonPrompt() {
+  return `반드시 JSON만 출력 (마크다운·설명 없이):
+{
+  "date":"날짜(YYYY-MM-DD, 없으면 ${today()})",
+  "contact":"컨택유형(방문/전화/문자/카카오/SNS/기타)",
+  "next":"다음 액션 요약",
+  "memo":"이번 상담 내용 요약 (2-3줄)"
+}`;
+}
+
+async function analyzeFuText(idx) {
+  const raw=$('fuRawInput').value.trim();
+  if (!raw) { alert('내용을 입력해주세요'); return; }
+  const btn=$('fuAnalyzeBtn'); btn.disabled=true;
+  $('fuAnalyzeBtnContent').innerHTML='<span class="spinner"></span>&nbsp; 분석 중...';
+  try {
+    const prompt = `당신은 BYD 전기차 영업 어시스턴트입니다. 아래 팔로업 상담 내용을 분석해 정보를 추출해주세요.\n\n입력:\n${JSON.stringify(raw)}\n\n${fuJsonPrompt()}`;
+    const d=await claude([{role:'user',content:prompt}]);
+    if (d) fillFuResult(d);
+  } catch(e){alert('분석 실패: '+e.message);}
+  finally{btn.disabled=false;$('fuAnalyzeBtnContent').innerHTML='✦ &nbsp;AI로 정리';}
+}
+
+async function analyzeFuPhoto(idx) {
+  if (!fuImgBase64){alert('사진을 먼저 선택해주세요');return;}
+  const btn=$('fuAnalyzePhotoBtn'); btn.disabled=true;
+  $('fuAnalyzePhotoBtnContent').innerHTML='<span class="spinner"></span>&nbsp; 분석 중...';
+  try {
+    const prompt = `당신은 BYD 전기차 영업 어시스턴트입니다. 이 이미지(카카오톡/문자 캡처)에서 팔로업 상담 내용을 분석해 정보를 추출해주세요.\n왼쪽 말풍선=고객, 오른쪽=영업사원\n\n${fuJsonPrompt()}`;
+    const d=await claude([{role:'user',content:[
+      {type:'image',source:{type:'base64',media_type:fuImgType,data:fuImgBase64}},
+      {type:'text',text:prompt}
+    ]}]);
+    if (d) fillFuResult(d);
+  } catch(e){alert('분석 실패: '+e.message);}
+  finally{btn.disabled=false;$('fuAnalyzePhotoBtnContent').innerHTML='✦ &nbsp;사진 분석하기';}
+}
+
+function fillFuResult(d) {
+  const txt=(d.content||[]).map(i=>i.text||'').join('');
+  if (!txt) throw new Error('AI 응답 없음');
+  const p=JSON.parse(txt.replace(/```json|```/g,'').trim());
+  $('fu-date').value    = p.date    || today();
+  $('fu-contact').value = p.contact || '';
+  $('fu-next').value    = p.next    || '';
+  $('fu-memo').value    = p.memo    || '';
+  $('fuResult').style.display='block';
+  $('fuResult').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function selectFuWill(v) {
+  window._fuWill = v;
+  document.querySelectorAll('#fuWillGroup .will-btn').forEach(btn => {
+    btn.className='will-btn';
+    if (parseInt(btn.dataset.v)===v) btn.classList.add('active-'+v);
+  });
+}
+
+function selectFuStatus(v) {
+  window._fuStatus = v;
+  document.querySelectorAll('#fuStatusGroup .status-btn').forEach(btn => {
+    btn.className='status-btn';
+    if (btn.dataset.v===v) btn.classList.add('sel-'+v);
+  });
+}
+
+async function saveFuRecord(idx) {
+  const list = getRecords();
+  const r = list[idx];
+
+  const fuEntry = {
+    date:    $('fu-date').value    || today(),
+    contact: $('fu-contact').value || '',
+    next:    $('fu-next').value    || '',
+    memo:    $('fu-memo').value    || '',
+    will:    window._fuWill,
+    status:  window._fuStatus || r.status
+  };
+
+  // 팔로업 이력 추가
+  if (!r.followups) r.followups = [];
+  r.followups.push(fuEntry);
+
+  // 다음액션, 의지, 상태 업데이트
+  if (fuEntry.next)   r.next   = fuEntry.next;
+  if (window._fuWill !== null && window._fuWill !== undefined) r.will = window._fuWill;
+  if (window._fuStatus) r.status = window._fuStatus;
+
+  list[idx] = r;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+
+  // 웹훅 (팔로업)
+  const {webhook} = cfg();
+  let msg = '로컬 ✓';
+  if (webhook) {
+    try {
+      await fetch(webhook,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({...r, action:'followup_update', followupEntry: fuEntry})});
+      msg = '로컬 ✓ · 노션 이력 추가 ✓';
+    } catch(e){ msg='로컬 ✓ · 전송 실패'; }
+  } else { msg='로컬 ✓ · 웹훅 미설정'; }
+
+  $('fuSaveStatus').innerHTML=`<span style="color:#5aaa7a;font-size:12px;">✓ ${msg}</span>`;
+  setTimeout(()=>{
+    $('fuPopup').remove();
+    renderFollowup();
+  }, 1500);
+}
+
+// ── 설정 렌더 ──
+function renderSettings() {
+  const s=cfg();
+  $('webhookUrl').value=s.webhook;
+  $('apiKey').value=s.apiKey;
+  $('settingsCount').textContent=getRecords().length+'건';
+  loadUrlSettings();
 }
 
 async function testWebhook() {
@@ -915,700 +1350,73 @@ async function testWebhook() {
   }
 }
 
-// ── URL 설정 저장/로드 ──
-function saveUrlSettings() {
-  ['dolphin','atto3','seal','sealion7','lfp'].forEach(k => {
-    const el = document.getElementById('url-'+k);
-    if (el) localStorage.setItem('byd_url_'+k, el.value.trim());
-  });
-}
-
-function loadUrlSettings() {
-  ['dolphin','atto3','seal','sealion7','lfp'].forEach(k => {
-    const el = document.getElementById('url-'+k);
-    if (el) el.value = localStorage.getItem('byd_url_'+k) || '';
-  });
-}
-
-function getCarUrl(car) {
-  // 차종명으로 URL 매핑
-  const c = (car||'').toLowerCase();
-  if (c.includes('돌핀') || c.includes('dolphin')) {
-    return localStorage.getItem('byd_url_dolphin') || '';
-  }
-  if (c.includes('아토') || c.includes('atto')) {
-    return localStorage.getItem('byd_url_atto3') || '';
-  }
-  if (c.includes('씨라') || c.includes('sealion') || c.includes('sl7')) {
-    return localStorage.getItem('byd_url_sealion7') || '';
-  }
-  if (c.includes('씰') || c.includes('seal')) {
-    return localStorage.getItem('byd_url_seal') || '';
-  }
-  return '';
-}
-
-// ── 메시지 발송 팝업 ──
-function showMessagePopup() {
-  const name    = $('f-name').value.trim() || '고객';
-  const car     = $('f-car').value.trim() || '';
-  const date    = $('f-date').value.replace(/-/g,'').slice(2); // 260407
-  const carUrl  = getCarUrl(car);
-  const lfpUrl  = localStorage.getItem('byd_url_lfp') || '';
-
-  const existing = document.getElementById('msgPopup');
-  if (existing) existing.remove();
-
-  // 메시지 기본 조합
-  const defaultMsg = buildMessage(name, car, date, carUrl, lfpUrl);
-
-  const popup = document.createElement('div');
-  popup.id = 'msgPopup';
-  popup.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;';
-
-  popup.innerHTML = `
-    <div style="background:#141414;border:0.5px solid rgba(255,255,255,0.15);border-radius:14px;padding:20px;width:100%;max-width:480px;margin-top:20px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <div style="font-size:15px;font-weight:500;color:#f0f0f0;">💬 상담 후 메시지</div>
-        <button onclick="document.getElementById('msgPopup').remove()" style="background:transparent;border:none;color:#555;font-size:18px;cursor:pointer;">✕</button>
-      </div>
-
-      <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">차종 블로그 URL</div>
-      <input id="msg-car-url" type="url" value="${carUrl}" placeholder="차종 블로그 URL (자동입력)" style="width:100%;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:13px;padding:10px;outline:none;font-family:inherit;margin-bottom:10px;" oninput="updateMsgPreview()">
-
-      <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">LFP 배터리 블로그 URL</div>
-      <input id="msg-lfp-url" type="url" value="${lfpUrl}" placeholder="LFP 블로그 URL" style="width:100%;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:13px;padding:10px;outline:none;font-family:inherit;margin-bottom:14px;" oninput="updateMsgPreview()">
-
-      <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">발송 메시지 <span style="color:rgba(232,213,163,0.5);">(직접 수정 가능)</span></div>
-      <textarea id="msg-text" style="width:100%;height:220px;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:13px;padding:12px;outline:none;font-family:inherit;resize:none;line-height:1.8;">${defaultMsg}</textarea>
-
-      <div style="display:flex;gap:8px;margin-top:12px;">
-        <button onclick="copyMessage()" style="flex:1;height:48px;background:#e8d5a3;color:#1a1200;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
-          📋 복사
-        </button>
-        <button onclick="refreshMsg('${name}','${car}','${date}')" style="width:48px;height:48px;background:var(--surface2);color:var(--text2);border:0.5px solid var(--border2);border-radius:8px;font-size:18px;cursor:pointer;">
-          ↺
-        </button>
-      </div>
-      <div id="msg-copy-status" style="min-height:24px;margin-top:8px;text-align:center;font-size:12px;"></div>
-    </div>`;
-
-  document.body.appendChild(popup);
-
-  // URL 없으면 경고
-  if (!carUrl) {
-    document.getElementById('msg-copy-status').innerHTML =
-      '<span style="color:#e8a03a;">⚠ 설정 탭에서 차종 블로그 URL을 먼저 등록해주세요</span>';
-  }
-}
-
-function buildMessage(name, car, date, carUrl, lfpUrl) {
-  const carLine = carUrl ? `\n\n📌 ${car} 관련 자료\n${carUrl}` : '';
-  const lfpLine = lfpUrl ? `\n\n🔋 BYD LFP 배터리 정보\n${lfpUrl}` : '';
-
-  return `안녕하십니까 ${name} 고객님! 😊
-
-오늘 BYD 서초전시장에서 상담 도와드린 남광희 대리입니다.
-
-바쁘신 가운데 방문해 주셔서 진심으로 감사드립니다.
-오늘 상담해 드렸던 ${car} 관련 자료를 보내드리니 편하실 때 참고해 보시고, 추가로 궁금하신 사항이 있으시면 언제든지 편한 시간에 연락 주시면 성심껏 도와드리겠습니다!${carLine}${lfpLine}
-
-📞 남광희 대리
-BYD 서초전시장
-010-2055-3180`;
-}
-
-function updateMsgPreview() {
-  const carUrl = document.getElementById('msg-car-url').value.trim();
-  const lfpUrl = document.getElementById('msg-lfp-url').value.trim();
-  const name   = $('f-name').value.trim() || '고객';
-  const car    = $('f-car').value.trim() || '';
-  const date   = $('f-date').value.replace(/-/g,'').slice(2);
-  document.getElementById('msg-text').value = buildMessage(name, car, date, carUrl, lfpUrl);
-}
-
-function refreshMsg(name, car, date) {
-  const carUrl = document.getElementById('msg-car-url').value.trim();
-  const lfpUrl = document.getElementById('msg-lfp-url').value.trim();
-  document.getElementById('msg-text').value = buildMessage(name, car, date, carUrl, lfpUrl);
-}
-
-async function copyMessage() {
-  const text = document.getElementById('msg-text').value;
-  const status = document.getElementById('msg-copy-status');
-  try {
-    await navigator.clipboard.writeText(text);
-    status.innerHTML = '<span style="color:#5aaa7a;">✓ 복사됐습니다! 카톡/문자에 붙여넣기 하세요</span>';
-    setTimeout(() => {
-      status.innerHTML = '';
-      document.getElementById('msgPopup').remove();
-    }, 2000);
-  } catch(e) {
-    // 클립보드 실패 시 textarea 선택
-    document.getElementById('msg-text').select();
-    status.innerHTML = '<span style="color:#e8a03a;">텍스트를 선택했습니다. 직접 복사해주세요 (Ctrl+C)</span>';
-  }
-}
-
-// ── 연락처 저장 (vCard) ──
-function saveContact() {
-  const name  = $('f-name').value.trim();
-  const phone = $('f-phone').value.trim();
-  const car   = $('f-car').value.trim();
-  const date  = $('f-date').value.replace(/-/g,'').slice(2); // 260407
-  const interest = $('f-interest').value.trim();
-  const next  = $('f-next').value.trim();
-  const memo  = $('f-memo').value.trim();
-
-  if (!phone) { alert('연락처를 먼저 입력해주세요'); return; }
-
-  // 차종 약식 변환
-  const carMap = {
-    '씰':'씰', 'Seal':'씰', 'seal':'씰',
-    '아토3':'아토3', 'Atto3':'아토3', 'ATTO3':'아토3',
-    '한':'한', 'Han':'한',
-    '돌핀':'돌핀', 'Dolphin':'돌핀',
-    '씰U':'씨라7', 'SealU':'씨라7', 'Seal U':'씨라7'
-  };
-  const carShort = carMap[car] || car.split(' ')[0] || '';
-
-  // 연락처명 팝업
-  showVCardPopup({ name, phone, car: carShort, date, interest, next, memo });
-}
-
-function showVCardPopup(data) {
-  const existing = document.getElementById('vcardPopup');
-  if (existing) existing.remove();
-
-  // 기본 연락처명 조합
-  const defaultContactName = [data.date, data.name ? data.name + ' 고객님' : '', data.car].filter(Boolean).join(' ');
-  // 메모 내용
-  const defaultMemo = [
-    data.date + ' 상담',
-    data.interest,
-    data.next ? '다음: ' + data.next : ''
-  ].filter(Boolean).join(' / ');
-
-  const popup = document.createElement('div');
-  popup.id = 'vcardPopup';
-  popup.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
-
-  popup.innerHTML = `
-    <div style="background:#141414;border:0.5px solid rgba(255,255,255,0.15);border-radius:14px;padding:20px;width:100%;max-width:420px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <div style="font-size:15px;font-weight:500;color:#f0f0f0;">📱 연락처 저장</div>
-        <button onclick="document.getElementById('vcardPopup').remove()" style="background:transparent;border:none;color:#555;font-size:18px;cursor:pointer;">✕</button>
-      </div>
-
-      <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">연락처명</div>
-      <input id="vc-name" type="text" value="${defaultContactName}" style="width:100%;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:14px;font-weight:500;padding:10px;outline:none;font-family:inherit;margin-bottom:12px;">
-
-      <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">전화번호</div>
-      <input id="vc-phone" type="tel" value="${data.phone}" style="width:100%;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:14px;font-weight:500;padding:10px;outline:none;font-family:inherit;margin-bottom:12px;">
-
-      <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">연락처 메모</div>
-      <textarea id="vc-memo" style="width:100%;height:80px;background:#1c1c1c;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;color:#f0f0f0;font-size:13px;padding:10px;outline:none;font-family:inherit;resize:none;line-height:1.6;">${defaultMemo}</textarea>
-
-      <div style="font-size:11px;color:rgba(232,213,163,0.6);margin:8px 0 12px;line-height:1.6;">
-        💡 연락처명 뒤에 전시장/컨택방법 추가 가능<br>
-        예) ${defaultContactName} 서초쇼룸 방문
-      </div>
-
-      <button onclick="downloadVCard()" style="width:100%;height:48px;background:#e8d5a3;color:#1a1200;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">
-        📥 연락처 저장
-      </button>
-    </div>`;
-
-  document.body.appendChild(popup);
-}
-
-function downloadVCard() {
-  const name  = document.getElementById('vc-name').value.trim();
-  const phone = document.getElementById('vc-phone').value.trim().replace(/-/g,'');
-  const memo  = document.getElementById('vc-memo').value.trim();
-
-  if (!name || !phone) { alert('이름과 전화번호를 입력해주세요'); return; }
-
-  const vcard = [
-    'BEGIN:VCARD',
-    'VERSION:3.0',
-    'FN:' + name,
-    'N:' + name + ';;;;',
-    'TEL;TYPE=CELL:' + phone,
-    memo ? 'NOTE:' + memo.replace(/\n/g,'\\n') : '',
-    'END:VCARD'
-  ].filter(Boolean).join('\r\n');
-
-  const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = name + '.vcf';
-  a.click();
-  URL.revokeObjectURL(url);
-
-  setTimeout(() => {
-    document.getElementById('vcardPopup').remove();
-  }, 500);
-}
-
-function getRecords(){return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');}
-
-function tempBadgeHtml(temp) {
-  if (!temp) return '';
-  if (temp >= 70) return `<span class="temp-hot">🔥 ${temp}점</span>`;
-  if (temp >= 40) return `<span class="temp-warm">🌤 ${temp}점</span>`;
-  return `<span class="temp-cold">❄️ ${temp}점</span>`;
-}
-
-function renderHistory() {
-  const list=getRecords();
-  $('totalCount').textContent=list.length+'건';
-  const el=$('historyList');
-  if (!list.length){el.innerHTML='<div class="empty-state">저장된 기록이 없습니다</div>';return;}
-  el.innerHTML=list.map((r,i)=>`
-    <div class="record-item" style="position:relative;">
-      <div onclick="loadRecord(${i})" style="padding-right:40px;cursor:pointer;">
-        <div class="record-top">
-          <span class="record-name">${r.name||'미상'}</span>
-          <span class="record-car">${r.car||'미정'}</span>
-        </div>
-        <div class="record-meta">${r.date||''} · ${r.phone||''} · ${r.contact||'-'}</div>
-        <div class="record-next">→ ${r.next||'-'}</div>
-        ${r.temperature ? `<div style="margin-top:5px;">${tempBadgeHtml(r.temperature)}</div>` : ''}
-      </div>
-      <button onclick="deleteRecord(${i},event)" style="position:absolute;top:50%;right:10px;transform:translateY(-50%);background:transparent;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:6px;line-height:1;">✕</button>
-    </div>`).join('');
-}
-
-function deleteRecord(i, e) {
-  e.stopPropagation();
-  const list = getRecords();
-  const r = list[i];
-  if (!confirm('"' + (r.name||'미상') + '" 기록을 삭제할까요?')) return;
-  list.splice(i, 1);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-  renderHistory();
-}
-
-function loadRecord(i) {
-  const r=getRecords()[i];
-  ['date','name','phone','car','contact','region','interest','next','memo'].forEach(k=>{
-    const el=$('f-'+k); if(el) el.value=r[k]||'';
-  });
-  $('resultSection').style.display='block';
-  switchTab('input');
-}
-
-function renderSettings() {
-  const s=cfg();
-  $('webhookUrl').value=s.webhook;
-  $('apiKey').value=s.apiKey;
-  $('settingsCount').textContent=getRecords().length+'건';
-  loadUrlSettings();
-}
-
 function clearAll() {
-  if (confirm('저장된 기록을 모두 삭제할까요?')){localStorage.removeItem(STORAGE_KEY);renderSettings();alert('삭제 완료');}
-}
-
-// ══════════════════════════════════════
-// 🌡️ 온도 측정
-// ══════════════════════════════════════
-let lastTempData = null;
-
-async function analyzeTemperature() {
-  const text = $('tempInput').value.trim();
-  if (!text) { alert('대화 내용을 입력해주세요'); return; }
-  const car = $('tempCarSelect').value;
-  const btn = $('tempBtn'); btn.disabled = true;
-  $('tempBtnContent').innerHTML = '<span class="spinner spinner-light"></span>&nbsp; 분석 중...';
-  $('tempResult').style.display = 'none';
-  try {
-    const prompt = `당신은 자동차 영업 전문가입니다. BYD 전기차 영업사원의 고객 대화 내용을 분석하여 고객의 구매 관심도(온도)를 측정해주세요.
-${car ? `\n관심 차종: ${car}\n` : ''}
-대화 내용:
-"${text}"
-
-반드시 아래 JSON만 출력하세요 (마크다운, 설명 없이):
-{
-  "score": 0~100 사이 숫자 (구매 관심도. 70이상=뜨거움, 40~69=미지근, 39이하=차가움),
-  "level": "hot" 또는 "warm" 또는 "cold",
-  "label": "한글 한 줄 요약 (예: 가격 민감하나 적극 검토 중)",
-  "summary": "2~3줄 종합 분석. 고객의 현재 상태와 주요 관심/우려 사항 요약",
-  "positive": "긍정적 신호들을 줄바꿈으로 나열 (없으면 없음)",
-  "negative": "우려되는 신호들을 줄바꿈으로 나열 (없으면 없음)",
-  "strategies": ["전략1 (20자 이내)", "전략2 (20자 이내)", "전략3 (20자 이내)"]
-}`;
-    const d = await claude([{role:'user', content: prompt}]);
-    if (!d) return;
-    const txt = (d.content||[]).map(i=>i.text||'').join('');
-    const p = JSON.parse(txt.replace(/```json|```/g,'').trim());
-    lastTempData = p;
-    showTempResult(p);
-  } catch(e) {
-    alert('분석 실패: ' + e.message);
-  } finally {
-    btn.disabled = false;
-    $('tempBtnContent').innerHTML = '🌡️ &nbsp;온도 측정';
+  if (confirm('저장된 기록을 모두 삭제할까요?')){
+    localStorage.removeItem(STORAGE_KEY);
+    renderSettings();
+    alert('삭제 완료');
   }
 }
 
-function showTempResult(p) {
-  const score = p.score || 0;
-  const level = p.level || (score>=70?'hot':score>=40?'warm':'cold');
-  const configs = {
-    hot:  { emoji:'🔥', label:'뜨거움 — 적극 공략', barColor:'#e05a5a', badgeClass:'temp-hot',  badge:'🔥 HIGH' },
-    warm: { emoji:'🌤️', label:'미지근 — 지속 관리', barColor:'#e8a03a', badgeClass:'temp-warm', badge:'🌤 MID'  },
-    cold: { emoji:'❄️', label:'차가움 — 재접근 필요', barColor:'#5a8ae0', badgeClass:'temp-cold', badge:'❄️ LOW'  }
-  };
-  const c = configs[level] || configs.warm;
-  $('tempEmoji').textContent = c.emoji;
-  $('tempLabelBig').textContent = c.label;
-  $('tempBadge').innerHTML = `<span class="${c.badgeClass}">${c.badge}</span>`;
-  $('tempScoreBig').textContent = score;
-  $('tempScoreBig').style.color = c.barColor;
-  $('tempBarFill').style.width = score + '%';
-  $('tempBarFill').style.background = c.barColor;
-  $('tempSummary').textContent = p.summary || '';
-  $('tempPositive').innerHTML = (p.positive||'없음').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>`• ${l}`).join('<br>');
-  $('tempNegative').innerHTML = (p.negative||'없음').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>`• ${l}`).join('<br>');
-  $('tempStrategy').innerHTML = (p.strategies||[]).map((s,i)=>`<div class="temp-strategy-item"><span class="temp-num">${i+1}</span><span>${s}</span></div>`).join('');
-  $('tempResult').style.display = 'block';
-  $('tempResult').scrollIntoView({behavior:'smooth', block:'start'});
-}
-
-function copyTempResult() {
-  if (!lastTempData) return;
-  const p = lastTempData;
-  const text = `[온도 측정 결과]\n점수: ${p.score}점 (${p.label})\n\n분석: ${p.summary}\n\n긍정신호:\n${p.positive}\n\n우려신호:\n${p.negative}\n\n추천전략:\n${(p.strategies||[]).map((s,i)=>`${i+1}. ${s}`).join('\n')}`;
-  navigator.clipboard.writeText(text).then(()=>{
-    $('tempSaveStatus').innerHTML = '<span class="badge badge-ok"><span class="dot"></span>복사 완료</span>';
-    setTimeout(()=>{ $('tempSaveStatus').innerHTML=''; }, 2000);
-  }).catch(()=>{ alert('복사에 실패했습니다. 직접 선택해서 복사해주세요.'); });
-}
-
-function saveTempToRecord() {
-  if (!lastTempData) { alert('먼저 온도 측정을 해주세요'); return; }
-  const list = getRecords();
-  if (!list.length) { alert('먼저 고객 기록을 저장해주세요'); return; }
-  const idx = parseInt($('tempRecordSelect').value);
-  const target = isNaN(idx) ? 0 : idx;
-  list[target].temperature = lastTempData.score;
-  list[target].tempLabel   = lastTempData.label;
-  list[target].tempLevel   = lastTempData.level;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-  // 구글시트+노션 동기화
-  const {webhook} = cfg();
-  if (webhook) {
-    const record = {...list[target], action:'update_temperature'};
-    fetch(webhook, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(record)}).catch(()=>{});
-  }
-  $('tempSaveStatus').innerHTML = '<span class="badge badge-ok"><span class="dot"></span>기록에 온도 저장 완료 ✓ (시트+노션 동기화)</span>';
-  setTimeout(()=>{ $('tempSaveStatus').innerHTML=''; }, 2500);
-}
-
-function renderTempRecordSelect() {
-  const list = getRecords();
-  const sel = $('tempRecordSelect');
-  sel.innerHTML = '<option value="">고객 선택...</option>' +
-    list.map((r,i)=>`<option value="${i}">${r.name||'미상'} · ${r.car||'미정'} · ${r.date||''}</option>`).join('');
-}
-
-function loadRecordForTemp() {
-  const idx = parseInt($('tempRecordSelect').value);
-  if (isNaN(idx)) { alert('고객을 선택해주세요'); return; }
-  const r = getRecords()[idx];
-  const text = [
-    r.interest ? `관심사: ${r.interest}` : '',
-    r.memo     ? `메모: ${r.memo}` : '',
-    r.next     ? `다음액션: ${r.next}` : '',
-    r.contact  ? `컨택유형: ${r.contact}` : ''
-  ].filter(Boolean).join('\n');
-  $('tempInput').value = text || '(저장된 내용이 부족합니다. 직접 대화내용을 입력해주세요)';
-  if (r.car) $('tempCarSelect').value = r.car;
-  $('tempInput').scrollIntoView({behavior:'smooth'});
-}
-
-// ══════════════════════════════════════
-// 📋 팔로업 리스트
-// ══════════════════════════════════════
-let followupFilter = 'all';
-
-function setFollowupFilter(f) {
-  followupFilter = f;
-  ['all','urgent','soon','ok'].forEach(k => {
-    $('ff-'+k).classList.toggle('active', k===f);
-  });
-  renderFollowup();
-}
-
-function daysSince(dateStr) {
-  if (!dateStr) return 999;
-  const d = new Date(dateStr);
-  if (isNaN(d)) return 999;
-  return Math.floor((Date.now() - d.getTime()) / 86400000);
-}
-
-function renderFollowup() {
-  const list = getRecords();
-  const el = $('followupList');
-  const enriched = list.map((r, i) => ({...r, idx:i, days:daysSince(r.date)})).sort((a,b)=>b.days-a.days);
-  const filtered = enriched.filter(r => {
-    if (followupFilter==='urgent') return r.days >= 7;
-    if (followupFilter==='soon')   return r.days >= 3 && r.days < 7;
-    if (followupFilter==='ok')     return r.days < 3;
-    return true;
-  });
-  if (!filtered.length) { el.innerHTML='<div class="empty-state">해당 조건의 고객이 없습니다</div>'; return; }
-  el.innerHTML = filtered.map(r => {
-    const d = r.days;
-    const cls = d>=7?'urgent':d>=3?'soon':'ok';
-    const lbl = d===0?'오늘':d>=999?'?':d+'일전';
-    const th = r.temperature ? tempBadgeHtml(r.temperature) : '';
-    return `<div class="followup-item">
-      <div class="followup-days ${cls}">${lbl}</div>
-      <div class="followup-info">
-        <div class="followup-name">${r.name||'미상'} <span style="font-size:11px;color:var(--text3);font-family:monospace;">${r.car||''}</span></div>
-        <div class="followup-sub">${r.next||r.interest||'다음 액션 없음'}</div>
-        ${th?`<div style="margin-top:4px;">${th}</div>`:''}
-      </div>
-      <button onclick="quickFollowup(${r.idx})" style="background:transparent;border:0.5px solid var(--border2);border-radius:8px;color:var(--accent);font-size:11px;padding:6px 10px;cursor:pointer;white-space:nowrap;font-family:inherit;">연락</button>
-    </div>`;
-  }).join('');
-}
-
-function quickFollowup(idx) {
-  const r = getRecords()[idx];
-  if (!r) return;
-  ['date','name','phone','car','contact','region','interest','next','memo'].forEach(k=>{
-    const el=$('f-'+k); if(el) el.value=r[k]||'';
-  });
-  $('resultSection').style.display='block';
-  switchTab('input');
-  setTimeout(()=>showMessagePopup(), 300);
-}
-
-// ══════════════════════════════════════
-// 📅 날짜 / 📞 연락처 자동 포맷
-// ══════════════════════════════════════
+// ── 날짜 / 전화번호 자동 포맷 ──
 function autoFormatDate(input) {
-  let v = input.value.replace(/[^0-9]/g, '');
-  // 6자리: 260408 → 2026-04-08
-  if (v.length === 6) {
-    const yy = v.slice(0,2), mm = v.slice(2,4), dd = v.slice(4,6);
-    const formatted = '20' + yy + '-' + mm + '-' + dd;
-    // 유효한 날짜인지 확인
-    const d = new Date(formatted);
+  let v = input.value.replace(/[^0-9]/g,'');
+  let formatted = '';
+  if (v.length===6)      formatted='20'+v.slice(0,2)+'-'+v.slice(2,4)+'-'+v.slice(4,6);
+  else if (v.length===8) formatted=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);
+  if (formatted) {
+    const d=new Date(formatted);
     if (!isNaN(d)) {
-      input.value = formatted;
-      input.style.color = 'var(--green)';
-      setTimeout(() => { input.style.color = ''; }, 1000);
-    }
-  }
-  // 8자리: 20260408 → 2026-04-08
-  else if (v.length === 8) {
-    const yyyy = v.slice(0,4), mm = v.slice(4,6), dd = v.slice(6,8);
-    const formatted = yyyy + '-' + mm + '-' + dd;
-    const d = new Date(formatted);
-    if (!isNaN(d)) {
-      input.value = formatted;
-      input.style.color = 'var(--green)';
-      setTimeout(() => { input.style.color = ''; }, 1000);
+      input.value=formatted;
+      input.style.color='var(--green)';
+      setTimeout(()=>{input.style.color='';},1000);
     }
   }
 }
 
 function autoFormatPhone(input) {
-  let v = input.value.replace(/[^0-9]/g, '');
-  let formatted = '';
-  // 010/011/016/017/018/019 — 11자리
-  if (v.length === 11 && v.startsWith('0')) {
-    formatted = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7,11);
-  }
-  // 지역번호 10자리 (02-XXXX-XXXX)
-  else if (v.length === 10 && v.startsWith('02')) {
-    formatted = v.slice(0,2) + '-' + v.slice(2,6) + '-' + v.slice(6,10);
-  }
-  // 일반 지역번호 10자리 (0XX-XXX-XXXX)
-  else if (v.length === 10) {
-    formatted = v.slice(0,3) + '-' + v.slice(3,6) + '-' + v.slice(6,10);
-  }
+  let v = input.value.replace(/[^0-9]/g,'');
+  let formatted='';
+  if      (v.length===11&&v.startsWith('0'))  formatted=v.slice(0,3)+'-'+v.slice(3,7)+'-'+v.slice(7,11);
+  else if (v.length===10&&v.startsWith('02')) formatted=v.slice(0,2)+'-'+v.slice(2,6)+'-'+v.slice(6,10);
+  else if (v.length===10)                      formatted=v.slice(0,3)+'-'+v.slice(3,6)+'-'+v.slice(6,10);
   if (formatted) {
-    input.value = formatted;
-    input.style.color = 'var(--green)';
-    setTimeout(() => { input.style.color = ''; }, 1000);
+    input.value=formatted;
+    input.style.color='var(--green)';
+    setTimeout(()=>{input.style.color='';},1000);
   }
 }
 
-// ══════════════════════════════════════
-// 📅 날짜 / 📞 연락처 자동 포맷
-// ══════════════════════════════════════
-function autoFormatDate(input) {
-  let v = input.value.replace(/[^0-9]/g, '');
-  let formatted = '';
-  if (v.length === 6) {
-    formatted = '20' + v.slice(0,2) + '-' + v.slice(2,4) + '-' + v.slice(4,6);
-  } else if (v.length === 8) {
-    formatted = v.slice(0,4) + '-' + v.slice(4,6) + '-' + v.slice(6,8);
-  }
-  if (formatted) {
-    const d = new Date(formatted);
-    if (!isNaN(d)) {
-      input.value = formatted;
-      input.style.color = 'var(--green)';
-      setTimeout(() => { input.style.color = ''; }, 1000);
-    }
-  }
-}
-
-function autoFormatPhone(input) {
-  let v = input.value.replace(/[^0-9]/g, '');
-  let formatted = '';
-  if (v.length === 11 && v.startsWith('0')) {
-    formatted = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7,11);
-  } else if (v.length === 10 && v.startsWith('02')) {
-    formatted = v.slice(0,2) + '-' + v.slice(2,6) + '-' + v.slice(6,10);
-  } else if (v.length === 10) {
-    formatted = v.slice(0,3) + '-' + v.slice(3,6) + '-' + v.slice(6,10);
-  }
-  if (formatted) {
-    input.value = formatted;
-    input.style.color = 'var(--green)';
-    setTimeout(() => { input.style.color = ''; }, 1000);
-  }
-}
-
+// ── 초기화 ──
 updateConn();
+selectStatus('신규');
 
-// ══════════════════════════════════════
-// 📱 앱 상태 유지 (백그라운드 복귀 시)
-// ══════════════════════════════════════
-const STATE_KEY = 'byd_appstate';
-
-function saveAppState() {
-  const state = {
-    tab: document.querySelector('.tab.active') ?
-      ['input','history','temperature','followup','settings'][
-        [...document.querySelectorAll('.tab')].findIndex(t => t.classList.contains('active'))
-      ] : 'input',
-    mode: currentMode,
-    rawInput:    document.getElementById('rawInput')    ? document.getElementById('rawInput').value    : '',
-    tempInput:   document.getElementById('tempInput')   ? document.getElementById('tempInput').value   : '',
-    resultVisible: document.getElementById('resultSection') ?
-      document.getElementById('resultSection').style.display !== 'none' : false,
-    fields: ['date','name','phone','car','contact','region','interest','next','memo'].reduce((o,k) => {
-      const el = document.getElementById('f-'+k);
-      if (el) o[k] = el.value;
-      return o;
-    }, {}),
-    lastTempData: lastTempData || null
-  };
-  sessionStorage.setItem(STATE_KEY, JSON.stringify(state));
-}
-
-function restoreAppState() {
-  try {
-    const raw = sessionStorage.getItem(STATE_KEY);
-    if (!raw) return;
-    const state = JSON.parse(raw);
-
-    // 탭 복원
-    if (state.tab) switchTab(state.tab);
-
-    // 입력 모드 복원
-    if (state.mode) switchMode(state.mode);
-
-    // 텍스트 입력 복원
-    if (state.rawInput && document.getElementById('rawInput'))
-      document.getElementById('rawInput').value = state.rawInput;
-    if (state.tempInput && document.getElementById('tempInput'))
-      document.getElementById('tempInput').value = state.tempInput;
-
-    // 결과 필드 복원
-    if (state.fields) {
-      Object.entries(state.fields).forEach(([k,v]) => {
-        const el = document.getElementById('f-'+k);
-        if (el && v) el.value = v;
-      });
-      // 필드에 값이 있으면 결과 섹션 표시
-      const hasData = Object.values(state.fields).some(v => v && v.trim());
-      if (hasData && state.resultVisible) {
-        document.getElementById('resultSection').style.display = 'block';
-      }
+// 견적기에서 넘어온 파라미터 자동 입력
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('from')==='quotation') {
+    const name  = params.get('name')  || '';
+    const car   = params.get('car')   || '';
+    const quote = params.get('quote') || '';
+    if (name||car||quote) {
+      if (name)  $('f-name').value  = name;
+      if (car)   $('f-car').value   = car;
+      if (quote) $('f-memo').value  = '견적: '+quote;
+      $('f-date').value = today();
+      $('resultSection').style.display='block';
+      setTimeout(()=>{
+        $('saveStatus').innerHTML='<span class="badge badge-info"><span class="dot"></span>견적기에서 데이터를 불러왔습니다. 나머지 정보를 입력 후 저장해주세요.</span>';
+      },300);
     }
-
-    // 온도 데이터 복원
-    if (state.lastTempData) {
-      lastTempData = state.lastTempData;
-      // 온도탭이었으면 결과 다시 표시
-      if (state.tab === 'temperature') {
-        showTempResult(lastTempData);
-      }
-      // 인라인 온도 복원
-      const tempWrap = document.getElementById('inlineTempResult');
-      if (tempWrap && state.resultVisible) {
-        const p = lastTempData;
-        const lv = p.level || 'warm';
-        const cfgs = {
-          hot:  {emoji:'🔥', color:'#e05a5a', cls:'temp-hot',  txt:'HIGH'},
-          warm: {emoji:'🌤️', color:'#e8a03a', cls:'temp-warm', txt:'MID'},
-          cold: {emoji:'❄️', color:'#5a8ae0', cls:'temp-cold', txt:'LOW'}
-        };
-        const c = cfgs[lv] || cfgs.warm;
-        const strats = (p.strategies||[]).map((s,i) =>
-          '<div style="font-size:12px;color:var(--text2);padding:3px 0;">'+(i+1)+'. '+s+'</div>'
-        ).join('');
-        const stratHtml = strats ? '<div style="font-size:11px;color:var(--text3);margin-bottom:4px;margin-top:8px;">추천 전략</div>'+strats : '';
-        tempWrap.style.display = 'block';
-        tempWrap.innerHTML =
-          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'+
-            '<div style="display:flex;align-items:center;gap:8px;">'+
-              '<span style="font-size:22px;">'+c.emoji+'</span>'+
-              '<div>'+
-                '<span class="'+c.cls+'" style="font-size:13px;">'+c.emoji+' '+c.txt+' · '+p.score+'점</span>'+
-                '<div style="font-size:12px;color:var(--text3);margin-top:3px;">'+(p.label||'')+'</div>'+
-              '</div>'+
-            '</div>'+
-            '<button onclick="showFullTempFromInline()" style="background:transparent;border:0.5px solid var(--border2);border-radius:6px;color:var(--accent);font-size:11px;padding:5px 10px;cursor:pointer;font-family:inherit;">상세보기</button>'+
-          '</div>'+
-          '<div style="height:5px;background:var(--surface);border-radius:3px;overflow:hidden;margin-bottom:6px;">'+
-            '<div style="height:100%;width:'+p.score+'%;background:'+c.color+';border-radius:3px;"></div>'+
-          '</div>'+
-          stratHtml;
-      }
-    }
-  } catch(e) {
-    // 복원 실패해도 조용히 넘김
-    console.log('상태 복원 실패:', e);
   }
+})();
+
+// PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
 }
-
-// 홈화면 나갈 때 / 백그라운드 진입 시 즉시 저장
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') saveAppState();
-});
-
-// 입력 중에도 실시간 저장 (1초 디바운스)
-let stateTimer = null;
-function debouncedSave() {
-  clearTimeout(stateTimer);
-  stateTimer = setTimeout(saveAppState, 1000);
-}
-document.addEventListener('input', debouncedSave);
-document.addEventListener('click', debouncedSave);
-
-// switchTab 호출 시에도 저장
-const _origSwitchTab = switchTab;
-window.switchTab = function(tab) {
-  _origSwitchTab(tab);
-  setTimeout(saveAppState, 100);
-};
-
-// 페이지 로드 시 복원
-window.addEventListener('load', () => {
-  setTimeout(restoreAppState, 150);
-});
 </script>
 </body>
 </html>
