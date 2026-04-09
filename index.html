@@ -259,9 +259,9 @@
         <div class="result-row"><span class="result-key">관심차종</span><input class="result-input" id="f-car"></div>
         <div class="result-row"><span class="result-key">컨택유형</span><input class="result-input" id="f-contact"></div>
         <div class="result-row"><span class="result-key">거주지</span><input class="result-input" id="f-region" placeholder="예: 경기도 광주, 서울 강남"></div>
-        <div class="result-row"><span class="result-key">주요관심사</span><input class="result-input" id="f-interest"></div>
         <div class="result-row"><span class="result-key">다음액션</span><input class="result-input" id="f-next"></div>
         <div class="result-row"><span class="result-key">메모</span><input class="result-input" id="f-memo"></div>
+        <div class="result-row"><span class="result-key">견적내용</span><input class="result-input" id="f-quote" placeholder="견적기 자동입력 또는 직접 입력"></div>
       </div>
     </div>
 
@@ -371,6 +371,15 @@
     <div class="setting-row"><div class="setting-label">⚡ 씰</div><input type="url" id="url-seal"     placeholder="https://blog.naver.com/..." oninput="saveUrlSettings()"></div>
     <div class="setting-row"><div class="setting-label">🦁 씨라이언7</div><input type="url" id="url-sealion7" placeholder="https://blog.naver.com/..." oninput="saveUrlSettings()"></div>
     <div class="setting-row" style="margin-bottom:0;"><div class="setting-label">🔋 LFP 배터리</div><input type="url" id="url-lfp" placeholder="https://blog.naver.com/..." oninput="saveUrlSettings()"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">노션 동기화</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.7;">노션 DB의 고객 데이터를 앱으로 불러옵니다.<br>기존 로컬 데이터는 노션 데이터로 덮어씁니다.</div>
+    <button class="btn btn-outline btn-sm" id="syncBtn" onclick="syncFromNotion()" style="color:var(--accent);border-color:rgba(232,213,163,0.3);margin-bottom:8px;">
+      <span id="syncBtnContent">☁️ &nbsp;노션에서 DB 불러오기</span>
+    </button>
+    <div id="syncStatus" style="min-height:24px;"></div>
   </div>
 
   <div class="card">
@@ -543,10 +552,9 @@ function jsonPrompt() {
   "phone":"연락처(010-XXXX-XXXX, 없으면 빈문자열)",
   "car":"관심차종(차종 매핑 적용, 없으면 미정)",
   "contact":"컨택유형(방문/전화/문자/카카오/SNS/기타)",
-  "interest":"주요 관심사 요약(1-2줄)",
   "next":"다음 액션(없으면 추후 연락)",
   "region":"거주지(시/구/동 수준으로 추출, 없으면 빈문자열)",
-  "memo":"기타 메모(없으면 빈문자열)"
+  "memo":"상담 내용 요약 + 주요 관심사(시승/가격/충전/보조금 등) 포함 (없으면 빈문자열)"
 }
 
 [차종 매핑]
@@ -576,8 +584,7 @@ async function analyzeText() {
       '3. 관심차종: 언급된 BYD 차종 (차종 매핑 적용)',
       '4. 컨택유형: 카카오/문자/전화/방문/SNS 중 해당',
       '5. 다음액션: 합의된 약속을 구체적으로 추출',
-      '6. 주요관심사: 시승/가격/충전/보조금 등',
-      '7. 메모: 거주지, 특이사항',
+      '6. 메모: 주요 관심사(시승/가격/충전/보조금 등) + 거주지 + 특이사항 모두 포함',
       '',
       '입력 내용:',
       JSON.stringify(raw),
@@ -634,10 +641,11 @@ function fillResult(d) {
   const txt=(d.content||[]).map(i=>i.text||'').join('');
   if (!txt) throw new Error('AI 응답 없음');
   const p=JSON.parse(txt.replace(/```json|```/g,'').trim());
-  ['date','name','phone','car','contact','region','interest','next','memo'].forEach(k=>{
+  ['date','name','phone','car','contact','region','next','memo'].forEach(k=>{
     const el=$('f-'+k); if(el) el.value=p[k]||'';
   });
   if (!p.date) $('f-date').value=today();
+  // quote는 AI가 추출하지 않으므로 건드리지 않음
   resetWillStatus();
   $('resultSection').style.display='block';
   $('saveStatus').innerHTML='';
@@ -652,9 +660,9 @@ function fields() {
     car:      $('f-car').value,
     contact:  $('f-contact').value,
     region:   $('f-region') ? $('f-region').value : '',
-    interest: $('f-interest').value,
     next:     $('f-next').value,
     memo:     $('f-memo').value,
+    quote:    $('f-quote') ? $('f-quote').value : '',
     will:     selectedWill,
     status:   selectedStatus || '신규',
     savedAt:  new Date().toLocaleString('ko-KR'),
@@ -792,18 +800,17 @@ function saveContact() {
   const phone = $('f-phone').value.trim();
   const car   = $('f-car').value.trim();
   const date  = ($('f-date').value||today()).replace(/-/g,'').slice(2);
-  const interest = $('f-interest').value.trim();
   const next  = $('f-next').value.trim();
   const memo  = $('f-memo').value.trim();
   if (!phone) { alert('연락처를 먼저 입력해주세요'); return; }
-  showVCardPopup({ name, phone, car, date, interest, next, memo });
+  showVCardPopup({ name, phone, car, date, next, memo });
 }
 
 function showVCardPopup(data) {
   const existing = $('vcardPopup');
   if (existing) existing.remove();
   const defaultContactName = [data.date, data.name ? data.name+' 고객님' : '', data.car].filter(Boolean).join(' ');
-  const defaultMemo = [data.date+' 상담', data.interest, data.next ? '다음: '+data.next : ''].filter(Boolean).join(' / ');
+  const defaultMemo = [data.date+' 상담', data.memo, data.next ? '다음: '+data.next : ''].filter(Boolean).join(' / ');
   const popup = document.createElement('div');
   popup.id = 'vcardPopup';
   popup.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
@@ -925,7 +932,7 @@ function showEditPopup(r, idx) {
       <!-- 기본 정보 -->
       <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:0.06em;">기본 정보</div>
       <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
-        ${['date:날짜','name:고객명','phone:연락처','car:관심차종','contact:컨택유형','region:거주지','interest:주요관심사','next:다음액션','memo:메모'].map(kl=>{
+        ${['date:날짜','name:고객명','phone:연락처','car:관심차종','contact:컨택유형','region:거주지','next:다음액션','memo:메모','quote:견적내용'].map(kl=>{
           const [k,l]=kl.split(':');
           return `<div style="display:flex;align-items:center;gap:10px;">
             <span style="font-size:11px;color:var(--text3);min-width:68px;font-family:'DM Mono',monospace;">${l}</span>
@@ -986,7 +993,7 @@ function selectEditStatus(v) {
 async function saveEditRecord(idx) {
   const list = getRecords();
   const r = list[idx];
-  const fields = ['date','name','phone','car','contact','region','interest','next','memo'];
+  const fields = ['date','name','phone','car','contact','region','next','memo','quote'];
   fields.forEach(k => {
     const el = $('edit-'+k);
     if (el) r[k] = el.value;
@@ -1071,7 +1078,7 @@ function renderFollowup() {
           ${willBadgeHtml(r.will)}
         </div>
       </div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:10px;">→ ${r.next||r.interest||'다음 액션 없음'}</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px;">→ ${r.next||r.memo||'다음 액션 없음'}</div>
       <button onclick="showFollowupInput(${r.idx})" style="width:100%;height:38px;background:rgba(232,213,163,0.08);border:0.5px solid rgba(232,213,163,0.25);border-radius:8px;color:#e8d5a3;font-size:13px;cursor:pointer;font-family:inherit;">✦ 팔로업 내용 입력</button>
     </div>`;
   }).join('');
@@ -1350,6 +1357,60 @@ async function testWebhook() {
   }
 }
 
+// ── 노션 DB 동기화 ──
+async function syncFromNotion() {
+  const {webhook} = cfg();
+  if (!webhook) { alert('설정 탭에서 웹훅 URL을 먼저 입력해주세요.'); return; }
+
+  const btn = $('syncBtn'); btn.disabled = true;
+  $('syncBtnContent').innerHTML = '<span class="spinner spinner-light"></span>&nbsp; 불러오는 중...';
+  $('syncStatus').innerHTML = '';
+
+  try {
+    const res = await fetch(webhook + '?action=getCustomers');
+    const data = await res.json();
+
+    if (data.result !== 'success') throw new Error(data.message || '응답 오류');
+
+    const customers = data.customers || [];
+    if (!customers.length) {
+      $('syncStatus').innerHTML = '<span class="badge badge-info"><span class="dot"></span>노션에 저장된 고객이 없습니다</span>';
+      return;
+    }
+
+    // 노션 데이터를 로컬 포맷으로 변환
+    const converted = customers.map(c => ({
+      date:      c.date      || '',
+      name:      c.name      || '',
+      phone:     c.phone     || '',
+      car:       c.car       || '',
+      contact:   c.contact   || '',
+      region:    c.region    || '',
+      next:      c.next      || '',
+      memo:      c.memo      || '',
+      quote:     c.quote     || '',
+      will:      c.will !== undefined ? c.will : null,
+      status:    c.status    || '신규',
+      savedAt:   c.savedAt   || '',
+      followups: c.followups || [],
+      notionId:  c.notionId  || ''
+    }));
+
+    // 노션 우선으로 덮어쓰기
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(converted));
+
+    $('syncStatus').innerHTML = `<span class="badge badge-ok"><span class="dot"></span>노션에서 ${customers.length}명 불러옴 ✓</span>`;
+    $('settingsCount').textContent = customers.length + '건';
+
+  } catch(e) {
+    $('syncStatus').innerHTML = `<span class="badge badge-err"><span class="dot"></span>불러오기 실패: ${e.message}</span>`;
+  } finally {
+    btn.disabled = false;
+    $('syncBtnContent').innerHTML = '☁️ &nbsp;노션에서 DB 불러오기';
+  }
+}
+
+
 function clearAll() {
   if (confirm('저장된 기록을 모두 삭제할까요?')){
     localStorage.removeItem(STORAGE_KEY);
@@ -1401,7 +1462,7 @@ selectStatus('신규');
     if (name||car||quote) {
       if (name)  $('f-name').value  = name;
       if (car)   $('f-car').value   = car;
-      if (quote) $('f-memo').value  = '견적: '+quote;
+      if (quote) $('f-quote').value = '견적: '+quote;
       $('f-date').value = today();
       $('resultSection').style.display='block';
       setTimeout(()=>{
