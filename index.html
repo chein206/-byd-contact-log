@@ -547,17 +547,41 @@ async function claude(messages) {
 }
 
 function jsonPrompt() {
+  const t = today();
+  const d = new Date(t);
+  const dow = d.getDay();
+  const dayNames = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
+  const weekDates = {};
+  for (let i = 0; i < 7; i++) {
+    const dt = new Date(d); dt.setDate(d.getDate() + (i - dow));
+    weekDates[dayNames[i]] = dt.toISOString().split('T')[0];
+  }
+  const nextWeekDates = {};
+  for (let i = 0; i < 7; i++) {
+    const dt = new Date(d); dt.setDate(d.getDate() + (7 - dow) + i);
+    nextWeekDates[dayNames[i]] = dt.toISOString().split('T')[0];
+  }
+  const tomorrowDt = new Date(d); tomorrowDt.setDate(d.getDate()+1);
+
   return `반드시 JSON만 출력 (마크다운·설명 없이):
 {
-  "date":"날짜(YYYY-MM-DD, 없으면 ${today()})",
+  "date":"날짜(YYYY-MM-DD, 없으면 ${t})",
   "name":"고객명(없으면 미상)",
   "phone":"연락처(010-XXXX-XXXX, 없으면 빈문자열)",
   "car":"관심차종(차종 매핑 적용, 없으면 미정)",
   "contact":"컨택유형(방문/전화/문자/카카오/SNS/기타)",
-  "next":"다음 액션(없으면 추후 연락)",
+  "next":"다음 액션 (날짜 표현은 실제 날짜로 변환. 예: '이번주 토요일 방문' → '4/19(토) 방문')",
   "region":"거주지(시/구/동 수준으로 추출, 없으면 빈문자열)",
   "memo":"상담 내용 요약 + 주요 관심사(시승/가격/충전/보조금 등) 포함 (없으면 빈문자열)"
 }
+
+[오늘 날짜: ${t} (${dayNames[dow]})]
+[날짜 변환 규칙]
+- 오늘 = ${t}
+- 내일 = ${tomorrowDt.toISOString().split('T')[0]}
+- 이번주 ${dayNames.map(n=>`${n} = ${weekDates[n]}`).join(', ')}
+- 다음주 ${dayNames.map(n=>`${n} = ${nextWeekDates[n]}`).join(', ')}
+- next 필드에 날짜 포함 시 반드시 M/D(요일) 형식으로 명시
 
 [차종 매핑]
 씨라7/씨라이언7/sealion7/SL7/씰라이언 → 씨라이언7
@@ -1241,13 +1265,47 @@ function clearFuPhoto() {
 }
 
 function fuJsonPrompt() {
+  const t = today();
+  const d = new Date(t);
+  const dow = d.getDay(); // 0=일, 1=월 ... 6=토
+  // 이번주 각 요일 날짜 계산
+  const weekDates = {};
+  const dayNames = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
+  for (let i = 0; i < 7; i++) {
+    const diff = i - dow;
+    const dt = new Date(d);
+    dt.setDate(d.getDate() + diff);
+    weekDates[dayNames[i]] = dt.toISOString().split('T')[0];
+  }
+  // 다음주 각 요일
+  const nextWeekDates = {};
+  for (let i = 0; i < 7; i++) {
+    const diff = (7 - dow) + i;
+    const dt = new Date(d);
+    dt.setDate(d.getDate() + diff);
+    nextWeekDates[dayNames[i]] = dt.toISOString().split('T')[0];
+  }
+  const todayStr = weekDates[dayNames[dow]];
+  const tomorrowDt = new Date(d); tomorrowDt.setDate(d.getDate()+1);
+  const tomorrowStr = tomorrowDt.toISOString().split('T')[0];
+
   return `반드시 JSON만 출력 (마크다운·설명 없이):
 {
-  "date":"날짜(YYYY-MM-DD, 없으면 ${today()})",
+  "date":"날짜(YYYY-MM-DD, 없으면 ${t})",
   "contact":"컨택유형(방문/전화/문자/카카오/SNS/기타)",
-  "next":"다음 액션 요약",
-  "memo":"이번 상담 내용 요약 (2-3줄)"
-}`;
+  "next":"다음 액션 요약 (날짜 표현은 실제 날짜로 변환해서 포함. 예: '토요일 방문' → '4/19(토) 방문')",
+  "memo":"이번 상담 내용 요약 (2-3줄, 날짜 표현은 실제 날짜로 변환)"
+}
+
+[오늘 날짜: ${t} (${dayNames[dow]})]
+[날짜 변환 규칙]
+- 오늘 = ${todayStr}
+- 내일 = ${tomorrowStr}
+- 이번주 ${dayNames.map((n,i)=>`${n} = ${weekDates[n]}`).join(', ')}
+- 다음주 ${dayNames.map((n,i)=>`${n} = ${nextWeekDates[n]}`).join(', ')}
+- "이번주 토요일", "이번 토요일" 등 → 해당 날짜로 변환
+- "다음주 월요일" 등 → 해당 날짜로 변환
+- next 필드에 날짜가 포함될 경우 반드시 YYYY-MM-DD 또는 M/D(요일) 형식으로 명시`;
 }
 
 async function analyzeFuText(idx) {
