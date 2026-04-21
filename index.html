@@ -1000,6 +1000,8 @@ function showEditPopup(r, idx) {
         <button onclick="saveEditRecord(${idx})" style="flex:2;height:48px;background:#1a2a1a;color:#5aaa7a;border:0.5px solid rgba(90,170,122,0.3);border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;">💾 수정 저장</button>
         <button onclick="showMessagePopup('${(r.name||'').replace(/'/g,"\\'")}','${(r.car||'').replace(/'/g,"\\'")}','${(r.contact||'').replace(/'/g,"\\'")}');document.getElementById('editPopup').remove();" style="flex:1;height:48px;background:transparent;color:#e8d5a3;border:0.5px solid rgba(232,213,163,0.3);border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;">💬 메시지</button>
       </div>
+      <button onclick="saveContactFromEdit(${idx})" style="width:100%;height:40px;background:transparent;color:var(--text2);border:0.5px solid var(--border2);border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:4px;">📱 연락처 저장</button>
+      </div>
       <div id="editSaveStatus" style="min-height:24px;margin-top:8px;"></div>
     </div>`;
 
@@ -1010,8 +1012,21 @@ function showEditPopup(r, idx) {
   window._editStatus = r.status || '신규';
 }
 
-let _editWill = null;
-let _editStatus = '신규';
+function saveContactFromEdit(idx) {
+  const r = getRecords()[idx];
+  if (!r) return;
+  const date = (r.date||'').replace(/-/g,'').slice(2);
+  showVCardPopup({
+    name: r.name||'',
+    phone: r.phone||'',
+    car: r.car||'',
+    date: date,
+    next: r.next||'',
+    memo: r.memo||''
+  });
+}
+
+
 
 function selectEditWill(v) {
   window._editWill = v;
