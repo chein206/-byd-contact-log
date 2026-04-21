@@ -1,4 +1,4 @@
-const CACHE_NAME = 'byd-contact-v4';
+const CACHE_NAME = 'byd-contact-v5';
 const ASSETS = [
   './',
   './index.html',
@@ -6,12 +6,14 @@ const ASSETS = [
   './icon-192.png',
   './icon-512.png'
 ];
+
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
   self.skipWaiting();
 });
+
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -20,8 +22,17 @@ self.addEventListener('activate', e => {
   );
   self.clients.claim();
 });
+
+// network-first: 인터넷 있으면 항상 최신 파일, 없으면 캐시 fallback
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    fetch(e.request)
+      .then(res => {
+        // 성공하면 캐시에도 저장
+        const resClone = res.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(e.request, resClone));
+        return res;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
