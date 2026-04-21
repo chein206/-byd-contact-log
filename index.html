@@ -258,7 +258,28 @@
         <div class="result-row"><span class="result-key">날짜</span><input class="result-input" id="f-date" placeholder="260408" oninput="autoFormatDate(this)"></div>
         <div class="result-row"><span class="result-key">고객명</span><input class="result-input" id="f-name"></div>
         <div class="result-row"><span class="result-key">연락처</span><input class="result-input" id="f-phone" type="tel" placeholder="010-0000-0000" oninput="autoFormatPhone(this)"></div>
-        <div class="result-row"><span class="result-key">관심차종</span><input class="result-input" id="f-car"></div>
+        <div class="result-row"><span class="result-key">관심차종</span>
+          <select class="result-input" id="f-car" onchange="updateColorSelect()" style="background:transparent;border:none;border-bottom:0.5px solid transparent;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;outline:none;padding-bottom:1px;cursor:pointer;-webkit-appearance:none;">
+            <option value="">미정</option>
+            <option value="돌핀">돌핀 Standard</option>
+            <option value="돌핀Active">돌핀 Active</option>
+            <option value="아토3">아토3 Plus [26my]</option>
+            <option value="씰RWD">씰 Plus RWD</option>
+            <option value="씰AWD">씰 AWD Dynamic</option>
+            <option value="씨라이언7">씨라이언7 RWD</option>
+            <option value="씨라이언7Plus">씨라이언7 Plus [27my]</option>
+          </select>
+        </div>
+        <div class="result-row" id="f-color-ext-row" style="display:none;"><span class="result-key">외장색상</span>
+          <select class="result-input" id="f-color-ext" style="background:transparent;border:none;border-bottom:0.5px solid transparent;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;outline:none;padding-bottom:1px;cursor:pointer;-webkit-appearance:none;">
+            <option value="">선택 안함</option>
+          </select>
+        </div>
+        <div class="result-row" id="f-color-int-row" style="display:none;"><span class="result-key">내장색상</span>
+          <select class="result-input" id="f-color-int" style="background:transparent;border:none;border-bottom:0.5px solid transparent;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;outline:none;padding-bottom:1px;cursor:pointer;-webkit-appearance:none;">
+            <option value="">선택 안함</option>
+          </select>
+        </div>
         <div class="result-row"><span class="result-key">컨택유형</span><input class="result-input" id="f-contact"></div>
         <div class="result-row"><span class="result-key">거주지</span><input class="result-input" id="f-region" placeholder="예: 경기도 광주, 서울 강남"></div>
         <div class="result-row"><span class="result-key">다음액션</span><input class="result-input" id="f-next"></div>
@@ -670,8 +691,20 @@ function fillResult(d) {
   ['date','name','phone','car','contact','region','next','memo'].forEach(k=>{
     let val = p[k]||'';
     if (k==='next'||k==='memo') val = convertNaturalDates(val);
-    const el=$('f-'+k); if(el) el.value=val;
+    const el=$('f-'+k);
+    if (el) {
+      if (el.tagName === 'SELECT') {
+        // 드롭다운: 매핑된 값과 일치하는 option 선택
+        const opts = Array.from(el.options);
+        const match = opts.find(o => o.value === val || o.textContent.includes(val));
+        if (match) el.value = match.value;
+        else el.value = '';
+      } else {
+        el.value = val;
+      }
+    }
   });
+  updateColorSelect(); // 차종에 맞는 색상 드롭다운 업데이트
   if (!p.date) $('f-date').value=today();
   resetWillStatus();
   $('resultSection').style.display='block';
@@ -680,11 +713,15 @@ function fillResult(d) {
 }
 
 function fields() {
+  const colorExt = $('f-color-ext') ? $('f-color-ext').value : '';
+  const colorInt = $('f-color-int') ? $('f-color-int').value : '';
+  const colorStr = [colorExt, colorInt].filter(Boolean).join(' / ');
   return {
     date:     $('f-date').value,
     name:     $('f-name').value,
     phone:    $('f-phone').value,
     car:      $('f-car').value,
+    color:    colorStr,
     contact:  $('f-contact').value,
     region:   $('f-region') ? $('f-region').value : '',
     next:     $('f-next').value,
@@ -734,7 +771,47 @@ async function saveRecord() {
   $('saveBtnContent').textContent='💾 저장 (시트 + 노션 + 로컬)';
 }
 
-// ── URL 설정 ──
+// ── 상담기록용 차종별 색상 DB ──
+const CRM_COLOR_DB = {
+  '돌핀':       { ext: ['Ski White','Sand White'], int: ['Black'] },
+  '돌핀Active': { ext: ['Ski White','Sand White','Time Grey + Ski White','Cosmos Black + Atlantis Grey'], int: ['Black'] },
+  '아토3':      { ext: ['Ski White','Time Grey','Cosmos Black','Atlantis Grey'], int: ['Black'] },
+  '씰RWD':      { ext: ['Aurora White','Cosmos Black','Shark Grey','Atlantis Grey'], int: ['Black'] },
+  '씰AWD':      { ext: ['Aurora White','Cosmos Black','Shark Grey','Atlantis Grey'], int: ['Black'] },
+  '씨라이언7':  { ext: ['Aurora White','Cosmos Black','Shark Grey','Atlantis Grey'], int: ['Black'] },
+  '씨라이언7Plus': { ext: ['Aurora White','Cosmos Black','Shark Grey','Atlantis Grey'], int: ['Black','Tahiti Blue'] },
+};
+
+function updateColorSelect() {
+  const car = $('f-car') ? $('f-car').value : '';
+  const colors = CRM_COLOR_DB[car];
+  const extRow = $('f-color-ext-row');
+  const intRow = $('f-color-int-row');
+  const extSel = $('f-color-ext');
+  const intSel = $('f-color-int');
+  if (!colors || !extRow) return;
+
+  function buildOptions(sel, list) {
+    sel.innerHTML = '<option value="">선택 안함</option>';
+    list.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      sel.appendChild(opt);
+    });
+  }
+
+  if (colors) {
+    buildOptions(extSel, colors.ext);
+    buildOptions(intSel, colors.int);
+    extRow.style.display = '';
+    intRow.style.display = colors.int.length > 1 ? '' : 'none';
+  } else {
+    extRow.style.display = 'none';
+    intRow.style.display = 'none';
+  }
+}
+
+
 function saveUrlSettings() {
   ['dolphin','atto3','seal','sealion7','lfp'].forEach(k => {
     const el = $('url-'+k);
