@@ -73,6 +73,9 @@
   .tag-btn-blue{border-color:rgba(96,165,250,0.4);background:rgba(96,165,250,0.08);color:#93c5fd;}
   .tag-btn-dark{border:0.5px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:var(--text2);}
   .tag-btn-blue-dark{border-color:rgba(96,165,250,0.3);background:rgba(96,165,250,0.06);color:#93c5fd;}
+  .car-check-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:20px;font-size:11px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;border:0.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:var(--text2);transition:all 0.15s;}
+  .car-check-btn:has(input:checked){border-color:rgba(90,170,122,0.6);background:rgba(90,170,122,0.15);color:#5aaa7a;}
+  .car-check-btn input{width:11px;height:11px;accent-color:#5aaa7a;cursor:pointer;}
   .result-select{flex:1;background:transparent;border:none;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer;}
   .result-select option{background:var(--surface2);}
 
@@ -264,17 +267,21 @@
         <div class="result-row"><span class="result-key">날짜</span><input class="result-input" id="f-date" placeholder="260408" oninput="autoFormatDate(this)"></div>
         <div class="result-row"><span class="result-key">고객명</span><input class="result-input" id="f-name"></div>
         <div class="result-row"><span class="result-key">연락처</span><input class="result-input" id="f-phone" type="tel" placeholder="010-0000-0000" oninput="autoFormatPhone(this)"></div>
-        <div class="result-row"><span class="result-key">관심차종</span>
-          <select class="result-input" id="f-car" onchange="updateColorSelect()" style="background:transparent;border:none;border-bottom:0.5px solid transparent;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;outline:none;padding-bottom:1px;cursor:pointer;-webkit-appearance:none;">
-            <option value="">미정</option>
-            <option value="돌핀">돌핀 Standard</option>
-            <option value="돌핀Active">돌핀 Active</option>
-            <option value="아토3">아토3 Plus [26my]</option>
-            <option value="씰RWD">씰 Plus RWD</option>
-            <option value="씰AWD">씰 AWD Dynamic</option>
-            <option value="씨라이언7">씨라이언7 RWD</option>
-            <option value="씨라이언7Plus">씨라이언7 Plus [27my]</option>
-          </select>
+        <div style="padding:8px 0;border-bottom:0.5px solid var(--border);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <span class="result-key">관심차종</span>
+            <span style="font-size:11px;color:var(--text3);">복수선택 가능</span>
+          </div>
+          <div id="f-car-checkboxes" style="display:flex;flex-wrap:wrap;gap:6px;padding-left:78px;">
+            <label class="car-check-btn"><input type="checkbox" value="돌핀" onchange="onCarCheckChange()"> 돌핀</label>
+            <label class="car-check-btn"><input type="checkbox" value="돌핀Active" onchange="onCarCheckChange()"> 돌핀Active</label>
+            <label class="car-check-btn"><input type="checkbox" value="아토3" onchange="onCarCheckChange()"> 아토3</label>
+            <label class="car-check-btn"><input type="checkbox" value="씰RWD" onchange="onCarCheckChange()"> 씰RWD</label>
+            <label class="car-check-btn"><input type="checkbox" value="씰AWD" onchange="onCarCheckChange()"> 씰AWD</label>
+            <label class="car-check-btn"><input type="checkbox" value="씨라이언7" onchange="onCarCheckChange()"> 씨라이언7</label>
+            <label class="car-check-btn"><input type="checkbox" value="씨라이언7Plus" onchange="onCarCheckChange()"> 씨라7Plus</label>
+          </div>
+          <input type="hidden" id="f-car" value="">
         </div>
         <div class="result-row" id="f-color-ext-row" style="display:none;"><span class="result-key">외장색상</span>
           <select class="result-input" id="f-color-ext" style="background:transparent;border:none;border-bottom:0.5px solid transparent;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;outline:none;padding-bottom:1px;cursor:pointer;-webkit-appearance:none;">
@@ -298,6 +305,7 @@
             <option value="문자">문자</option>
             <option value="블로그">블로그</option>
             <option value="인터넷">인터넷</option>
+            <option value="소개">소개</option>
             <option value="기타">기타</option>
           </select>
         </div>
@@ -747,14 +755,13 @@ function fillResult(d) {
   const txt=(d.content||[]).map(i=>i.text||'').join('');
   if (!txt) throw new Error('AI 응답 없음');
   const p=JSON.parse(txt.replace(/```json|```/g,'').trim());
-  ['date','name','phone','car','contact','region','next','memo'].forEach(k=>{
+  ['date','name','phone','contact','region','next','memo'].forEach(k=>{
     let val = p[k]||'';
     if (k==='next'||k==='memo') val = convertNaturalDates(val);
     const el=$('f-'+k);
     if (el) {
       if (el.tagName === 'SELECT') {
         const opts = Array.from(el.options);
-        // 컨택유형: 부분 매핑 (예: "방문" → "서초내방" 첫 번째 매치)
         const match = opts.find(o => o.value === val) ||
                       opts.find(o => val && o.value.includes(val)) ||
                       opts.find(o => val && val.includes(o.value));
@@ -764,7 +771,8 @@ function fillResult(d) {
       }
     }
   });
-  updateColorSelect(); // 차종에 맞는 색상 드롭다운 업데이트
+  // 차종은 체크박스로 별도 처리
+  setSelectedCars(p.car || '');
   if (!p.date) $('f-date').value=today();
   resetWillStatus();
   $('resultSection').style.display='block';
@@ -843,13 +851,15 @@ const CRM_COLOR_DB = {
 };
 
 function updateColorSelect() {
-  const car = $('f-car') ? $('f-car').value : '';
+  // 첫 번째 선택된 차종 기준으로 색상 표시
+  const checked = Array.from(document.querySelectorAll('#f-car-checkboxes input:checked'));
+  const car = checked.length > 0 ? checked[0].value : '';
   const colors = CRM_COLOR_DB[car];
   const extRow = $('f-color-ext-row');
   const intRow = $('f-color-int-row');
   const extSel = $('f-color-ext');
   const intSel = $('f-color-int');
-  if (!colors || !extRow) return;
+  if (!extRow) return;
 
   function buildOptions(sel, list) {
     sel.innerHTML = '<option value="">선택 안함</option>';
@@ -869,6 +879,31 @@ function updateColorSelect() {
     extRow.style.display = 'none';
     intRow.style.display = 'none';
   }
+}
+
+// ── 차종 체크박스 ──
+function onCarCheckChange() {
+  const checked = Array.from(document.querySelectorAll('#f-car-checkboxes input:checked'))
+    .map(el => el.value);
+  const hidden = document.getElementById('f-car');
+  if (hidden) hidden.value = checked.join(', ');
+  updateColorSelect();
+}
+
+function getSelectedCars() {
+  const val = document.getElementById('f-car')?.value || '';
+  return val ? val.split(', ').filter(Boolean) : [];
+}
+
+function setSelectedCars(carStr) {
+  // carStr: "씰AWD" or "씰AWD, 씨라이언7" 등
+  const cars = carStr ? carStr.split(/[,\/]/).map(s => s.trim()).filter(Boolean) : [];
+  document.querySelectorAll('#f-car-checkboxes input').forEach(cb => {
+    cb.checked = cars.some(c => cb.value === c || c.includes(cb.value) || cb.value.includes(c));
+  });
+  const hidden = document.getElementById('f-car');
+  if (hidden) hidden.value = cars.join(', ');
+  updateColorSelect();
 }
 
 // ── 태그 버튼 append ──

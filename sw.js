@@ -1,4 +1,4 @@
-const CACHE_NAME = 'byd-contact-v5';
+const CACHE_NAME = 'byd-contact-v6';
 const ASSETS = [
   './',
   './index.html',
