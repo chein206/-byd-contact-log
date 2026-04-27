@@ -155,6 +155,8 @@
   .status-badge{display:inline-flex;align-items:center;font-size:11px;padding:2px 8px;border-radius:10px;}
   .st-신규{background:rgba(90,138,224,0.12);color:#5a8ae0;}
   .st-진행중{background:rgba(232,160,58,0.15);color:#e8a03a;}
+  .st-장기관리{background:rgba(168,85,247,0.12);color:#c084fc;}
+  .st-보류{background:rgba(148,163,184,0.15);color:#94a3b8;}
   .st-계약{background:rgba(90,170,122,0.15);color:#5aaa7a;}
   .st-출고완료{background:rgba(232,213,163,0.15);color:#e8d5a3;}
   .st-이탈{background:rgba(224,90,90,0.12);color:#e05a5a;}
@@ -362,11 +364,13 @@
     <div class="card">
       <div class="card-label">고객 상태</div>
       <div class="status-group" id="statusGroup">
-        <button class="status-btn" data-v="신규"   onclick="selectStatus('신규')">신규</button>
-        <button class="status-btn" data-v="진행중" onclick="selectStatus('진행중')">진행중</button>
-        <button class="status-btn" data-v="계약"   onclick="selectStatus('계약')">계약</button>
+        <button class="status-btn" data-v="신규"    onclick="selectStatus('신규')">신규</button>
+        <button class="status-btn" data-v="진행중"  onclick="selectStatus('진행중')">진행중</button>
+        <button class="status-btn" data-v="장기관리" onclick="selectStatus('장기관리')">장기관리</button>
+        <button class="status-btn" data-v="보류"    onclick="selectStatus('보류')">보류</button>
+        <button class="status-btn" data-v="계약"    onclick="selectStatus('계약')">계약</button>
         <button class="status-btn" data-v="출고완료" onclick="selectStatus('출고완료')">출고완료</button>
-        <button class="status-btn" data-v="이탈"   onclick="selectStatus('이탈')">이탈</button>
+        <button class="status-btn" data-v="이탈"    onclick="selectStatus('이탈')">이탈</button>
       </div>
     </div>
 
@@ -1175,7 +1179,7 @@ function showEditPopup(r, idx) {
       <!-- 고객 상태 -->
       <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:0.06em;">고객 상태</div>
       <div class="status-group" id="editStatusGroup" style="margin-bottom:14px;">
-        ${['신규','진행중','계약','출고완료','이탈'].map(v=>`<button class="status-btn${r.status===v?' sel-'+v:''}" data-v="${v}" onclick="selectEditStatus('${v}')">${v}</button>`).join('')}
+        ${['신규','진행중','장기관리','보류','계약','출고완료','이탈'].map(v=>`<button class="status-btn${r.status===v?' sel-'+v:''}" data-v="${v}" onclick="selectEditStatus('${v}')">${v}</button>`).join('')}
       </div>
 
       <!-- 팔로업 이력 -->
@@ -1407,6 +1411,7 @@ function showFollowupInput(idx) {
             <option value="문자">문자</option>
             <option value="블로그">블로그</option>
             <option value="인터넷">인터넷</option>
+            <option value="소개">소개</option>
             <option value="기타">기타</option>
           </select>
           </div>
@@ -1453,7 +1458,7 @@ function showFollowupInput(idx) {
         <!-- 상태 업데이트 -->
         <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:0.06em;">고객 상태 업데이트</div>
         <div class="status-group" id="fuStatusGroup" style="margin-bottom:16px;">
-          ${['신규','진행중','계약','출고완료','이탈'].map(v=>`<button class="status-btn${r.status===v?' sel-'+v:''}" data-v="${v}" onclick="selectFuStatus('${v}')">${v}</button>`).join('')}
+          ${['신규','진행중','장기관리','보류','계약','출고완료','이탈'].map(v=>`<button class="status-btn${r.status===v?' sel-'+v:''}" data-v="${v}" onclick="selectFuStatus('${v}')">${v}</button>`).join('')}
         </div>
 
         <button id="fuSaveBtn" onclick="saveFuRecord(${idx})" style="width:100%;height:48px;background:#1a2a1a;color:#5aaa7a;border:0.5px solid rgba(90,170,122,0.3);border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;"><span id="fuSaveBtnContent">💾 팔로업 저장</span></button>
